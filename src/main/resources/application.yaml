@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: ms-video
+  data:
+    mongodb:
+      user: ${MONGO_USERNAME:root}
+      password: ${MONGO_PASSWORD:password}
+      uri: ${MONGO_URI:mongodb://localhost:27017/msvideo}
+
+  cloud:
+    aws:
+      region:
+        static: ${AWS_REGION:us-east-1}
+    sqs:
+      endpoint: http://localhost:4566
+      queues:
+        video-uploaded-event: ${VIDEO_UPLOADED_EVENT:video-encoding-event}
+        video-process-command: ${VIDEO_PROCESS_COMMAND:video-process-command}
+        video-updated-event: ${VIDEO_UPDATED_EVENT:video-updated-event}
+
