@@ -1,5 +1,7 @@
 package com.nextimefood.msvideo.configuration;
 
+import io.awspring.cloud.sqs.config.SqsMessageListenerContainerFactory;
+import io.awspring.cloud.sqs.listener.QueueNotFoundStrategy;
 import java.net.URI;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -39,4 +41,15 @@ public class SqsConfiguration {
                 .region(Region.of(region))
                 .build();
     }
+
+    @Bean
+    public SqsMessageListenerContainerFactory<Object> defaultSqsListenerContainerFactory(SqsAsyncClient sqsAsyncClient) {
+        return SqsMessageListenerContainerFactory
+                .builder()
+                .sqsAsyncClient(sqsAsyncClient)
+                .configure(options -> options
+                        .queueNotFoundStrategy(QueueNotFoundStrategy.CREATE))
+                .build();
+    }
+
 }
