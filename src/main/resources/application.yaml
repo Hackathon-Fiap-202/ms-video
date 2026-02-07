@@ -17,4 +17,8 @@ spring:
         video-uploaded-event: ${VIDEO_UPLOADED_EVENT:video-encoding-event}
         video-process-command: ${VIDEO_PROCESS_COMMAND:video-process-command}
         video-updated-event: ${VIDEO_UPDATED_EVENT:video-updated-event}
-
+    s3:
+      endpoint: http://localhost:4566
+      bucket-name: ${S3_BUCKET_NAME:msvideo-bucket}
+      access-key: ${AWS_ACCESS_KEY_ID:test}
+      secret-key: ${AWS_SECRET_ACCESS_KEY:test}
