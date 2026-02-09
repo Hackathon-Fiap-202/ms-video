@@ -1,9 +1,10 @@
 package com.nextimefood.msvideo.infrastructure.persistence;
 
-import com.nextimefood.msvideo.application.domain.VideoStatus;
 import java.time.Instant;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.nextimefood.msvideo.domain.VideoStatus;
 
 @Document(collection = "videos")
 public class VideoDocument {

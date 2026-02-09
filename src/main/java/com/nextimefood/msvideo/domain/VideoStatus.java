@@ -1,4 +1,4 @@
-package com.nextimefood.msvideo.application.domain;
+package com.nextimefood.msvideo.domain;
 
 public enum VideoStatus {
     RECEIVED,
