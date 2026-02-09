@@ -1,7 +1,5 @@
 package com.nextimefood.msvideo.configuration;
 
-import io.awspring.cloud.sqs.config.SqsMessageListenerContainerFactory;
-import io.awspring.cloud.sqs.listener.QueueNotFoundStrategy;
 import java.net.URI;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,22 +8,23 @@ import org.springframework.context.annotation.Profile;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.sqs.SqsAsyncClient;
+import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
-public class SqsConfiguration {
+public class S3Configuration {
 
     @Value("${spring.cloud.aws.region.static}")
     private String region;
 
     @Bean
     @Profile({"local", "test"})
-    public SqsAsyncClient sqsAsyncClientLocal(
-            @Value("${spring.cloud.sqs.endpoint}") String endpoint
+    public S3Client s3ClientLocal(
+            @Value("${spring.cloud.s3.endpoint}") String endpoint
     ) {
-        return SqsAsyncClient.builder()
+        return S3Client.builder()
                 .region(Region.of(region))
                 .endpointOverride(URI.create(endpoint))
+                .forcePathStyle(true) // Necessário para o LocalStack
                 .credentialsProvider(
                         StaticCredentialsProvider.create(
                                 AwsBasicCredentials.create("test", "test")
@@ -36,20 +35,10 @@ public class SqsConfiguration {
 
     @Bean
     @Profile("!local & !test")
-    public SqsAsyncClient sqsAsyncClientEks() {
-        return SqsAsyncClient.builder()
+    public S3Client s3ClientProd() {
+        return S3Client.builder()
                 .region(Region.of(region))
                 .build();
     }
-
-    @Bean
-    public SqsMessageListenerContainerFactory<Object> defaultSqsListenerContainerFactory(SqsAsyncClient sqsAsyncClient) {
-        return SqsMessageListenerContainerFactory
-                .builder()
-                .sqsAsyncClient(sqsAsyncClient)
-                .configure(options -> options
-                        .queueNotFoundStrategy(QueueNotFoundStrategy.CREATE))
-                .build();
-    }
-
 }
+

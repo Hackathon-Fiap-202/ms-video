@@ -6,7 +6,7 @@ services:
     ports:
       - "4566:4566"
     environment:
-      SERVICES: "sqs,s3"
+      SERVICES: sqs,s3
       DEBUG: "1"
       AWS_DEFAULT_REGION: us-east-1
       AWS_ACCESS_KEY_ID: test

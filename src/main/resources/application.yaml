@@ -6,7 +6,11 @@ spring:
       user: ${MONGO_USERNAME:root}
       password: ${MONGO_PASSWORD:password}
       uri: ${MONGO_URI:mongodb://localhost:27017/msvideo}
-
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10GB
+      max-request-size: 10GB
   cloud:
     aws:
       region:
