@@ -18,7 +18,7 @@ spring:
     sqs:
       endpoint: http://localhost:4566
       queues:
-        video-uploaded-event: ${VIDEO_UPLOADED_EVENT:video-encoding-event}
+        video-process-event: ${VIDEO_PROCESSED_EVENT:video-processed-event}
         video-process-command: ${VIDEO_PROCESS_COMMAND:video-process-command}
         video-updated-event: ${VIDEO_UPDATED_EVENT:video-updated-event}
     s3:

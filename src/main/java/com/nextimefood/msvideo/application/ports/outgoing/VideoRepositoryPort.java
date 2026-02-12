@@ -6,4 +6,6 @@ public interface VideoRepositoryPort {
 
     VideoDocument save(VideoDocument video);
 
+    java.util.Optional<VideoDocument> findByKey(String key);
+
 }

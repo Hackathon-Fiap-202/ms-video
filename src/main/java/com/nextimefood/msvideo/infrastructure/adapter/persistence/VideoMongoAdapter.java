@@ -23,4 +23,9 @@ public class VideoMongoAdapter implements VideoRepositoryPort {
         video.setUpdatedAt(Instant.now());
         return repository.save(video);
     }
+
+    @Override
+    public java.util.Optional<VideoDocument> findByKey(String key) {
+        return repository.findByKey(key);
+    }
 }

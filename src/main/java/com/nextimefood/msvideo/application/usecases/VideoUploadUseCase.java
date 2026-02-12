@@ -4,6 +4,7 @@ import com.nextimefood.msvideo.application.dto.VideoProcessMessage;
 import com.nextimefood.msvideo.application.dto.VideoUploadRequest;
 import com.nextimefood.msvideo.application.mapper.VideoRequestMapper;
 import com.nextimefood.msvideo.application.ports.outgoing.VideoRepositoryPort;
+import com.nextimefood.msvideo.domain.VideoStatus;
 import com.nextimefood.msvideo.infrastructure.persistence.VideoDocument;
 import com.nextimefood.msvideo.application.ports.outgoing.MessagePublisherPort;
 import com.nextimefood.msvideo.application.ports.outgoing.VideoStoragePort;
@@ -37,22 +38,35 @@ public class VideoUploadUseCase {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("Arquivo vazio");
         }
-
         final var key = generateUniqueKey(file.getOriginalFilename());
+        var doc = saveReceived(file, key);
+        uploadFile(file, key);
+        publishMessage(key);
+        updateStatus(doc, VideoStatus.PROCESSING);
+        return key;
+    }
 
-        storage.upload(bucketName, key, file.getInputStream());
-
-        var payload = new VideoProcessMessage(bucketName, key);
-        publisher.publish(videoProcessCommandQueue, payload);
-
-        // persistir metadados do vídeo no MongoDB
+    private VideoDocument saveReceived(MultipartFile file, String key) {
         var request = new VideoUploadRequest(file.getOriginalFilename(), file.getContentType(), file.getSize());
         VideoDocument doc = mapper.toDocument(request);
         doc.setBucket(bucketName);
         doc.setKey(key);
-        repository.save(doc);
+        doc.setStatus(VideoStatus.RECEIVED);
+        return repository.save(doc);
+    }
 
-        return key;
+    private void uploadFile(MultipartFile file, String key) throws IOException {
+        storage.upload(bucketName, key, file.getInputStream());
+    }
+
+    private void publishMessage(String key) {
+        var payload = new VideoProcessMessage(bucketName, key);
+        publisher.publish(videoProcessCommandQueue, payload);
+    }
+
+    private void updateStatus(VideoDocument doc, VideoStatus status) {
+        doc.setStatus(status);
+        repository.save(doc);
     }
 
     private String generateUniqueKey(String originalFilename) {

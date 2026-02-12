@@ -2,23 +2,29 @@ package com.nextimefood.msvideo.infrastructure.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nextimefood.msvideo.application.dto.VideoUpdatedEvent;
+import com.nextimefood.msvideo.application.ports.outgoing.MessagePublisherPort;
+import com.nextimefood.msvideo.application.ports.outgoing.VideoRepositoryPort;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-/**
- * SQS Listener for video-updated-event queue
- */
 @Component
 public class VideoUpdatedEventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(VideoUpdatedEventListener.class);
 
     private final ObjectMapper objectMapper;
+    private final VideoRepositoryPort repository;
+    private final MessagePublisherPort publisher;
 
-    public VideoUpdatedEventListener(ObjectMapper objectMapper) {
+    @org.springframework.beans.factory.annotation.Value("${spring.cloud.sqs.queues.video-process-event}")
+    private String videoProcessedEventQueue;
+
+    public VideoUpdatedEventListener(ObjectMapper objectMapper, VideoRepositoryPort repository, MessagePublisherPort publisher) {
         this.objectMapper = objectMapper;
+        this.repository = repository;
+        this.publisher = publisher;
     }
 
     @SqsListener("${spring.cloud.sqs.queues.video-updated-event}")
@@ -30,7 +36,6 @@ public class VideoUpdatedEventListener {
 
             logger.info("Processing video updated event: {}", event);
 
-            // TODO: Add your business logic here
             processVideoUpdatedEvent(event);
 
             logger.info("Successfully processed video updated event for videoId: {}", event.getVideoId());
@@ -42,12 +47,10 @@ public class VideoUpdatedEventListener {
     }
 
     private void processVideoUpdatedEvent(VideoUpdatedEvent event) {
-        // TODO: Implement the business logic for processing video updated events
-        // For example:
-        // - Update video status in database
-        // - Send notifications
-        // - Trigger other workflows
-        logger.info("Processing event for video: {} with status: {}",
-                event.getVideoId(), event.getStatus());
+        repository.findByKey(event.getVideoId()).ifPresentOrElse(video -> {
+            video.setStatus(event.getStatus());
+            repository.save(video);
+            publisher.publish(videoProcessedEventQueue, event);
+        }, () -> logger.error("Video not found with key: {}", event.getVideoId()));
     }
 }
