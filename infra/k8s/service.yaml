@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-video
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app: ms-video
+  ports:
+    - port: 80
+      targetPort: 8080

@@ -41,7 +41,7 @@ public class VideoUploadUseCase {
     }
 
     public String upload(MultipartFile file) {
-        LOGGER.info("Starting video upload process for file: {}", file.getOriginalFilename());
+        LOGGER.info("Starting video upload process for file: {}", file != null ? file.getOriginalFilename() : "null");
         
         validateFile(file);
         

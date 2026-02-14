@@ -30,6 +30,7 @@
 		<java.version>17</java.version>
 		<spring-cloud-aws-starter-s3.version>4.0.0</spring-cloud-aws-starter-s3.version>
 		<spring-cloud-aws-starter-sqs.version>4.0.0</spring-cloud-aws-starter-sqs.version>
+		<jacoco.version>0.8.11</jacoco.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -110,6 +111,59 @@
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>PACKAGE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.0</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<excludes>
+						<exclude>**/infrastructure/**/*</exclude>
+						<exclude>**/domain/exception/*</exclude>
+						<exclude>**/domain/Video.class</exclude>
+						<exclude>**/domain/ProcessStatus.class</exclude>
+						<exclude>**/application/dto/*</exclude>
+						<exclude>**/application/mapper/*</exclude>
+						<exclude>**/application/ports/**/*</exclude>
+						<exclude>**/configuration/*</exclude>
+						<exclude>**/MsVideoApplication.class</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

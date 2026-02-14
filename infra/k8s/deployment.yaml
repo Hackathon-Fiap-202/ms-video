@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-video
+  namespace: default
+  labels:
+    app: ms-video
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ms-video
+  template:
+    metadata:
+      labels:
+        app: ms-video
+        tags.datadoghq.com/service: ms-video
+        tags.datadoghq.com/env: dev
+        tags.datadoghq.com/version: "1.0.0"
+    spec:
+      serviceAccountName: ms-video-sa
+      containers:
+        - name: ms-video
+          image: 500782030170.dkr.ecr.us-east-1.amazonaws.com/ms-video:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: ms-video-config
+            - secretRef:
+                name: ms-video-secrets
+          env:
+            - name: DD_SERVICE
+              value: ms-video
+            - name: DD_ENV
+              value: dev
+            - name: DD_VERSION
+              value: "1.0.0"
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1536Mi
+            requests:
+              cpu: 300m
+              memory: 768Mi
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
