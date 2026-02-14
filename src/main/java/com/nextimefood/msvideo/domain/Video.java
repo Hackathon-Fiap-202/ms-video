@@ -1,7 +1,11 @@
 package com.nextimefood.msvideo.domain;
 
 import java.time.Instant;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 public class Video {
 
     private String id;
@@ -35,91 +39,4 @@ public class Video {
         this.archiveSize = archiveSize;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getBucket() {
-        return bucket;
-    }
-
-    public void setBucket(String bucket) {
-        this.bucket = bucket;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public String getOriginalFilename() {
-        return originalFilename;
-    }
-
-    public void setOriginalFilename(String originalFilename) {
-        this.originalFilename = originalFilename;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
-    public long getSize() {
-        return size;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-
-    public ProcessStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ProcessStatus status) {
-        this.status = status;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public int getFrameCount() {
-        return frameCount;
-    }
-
-    public void setFrameCount(int frameCount) {
-        this.frameCount = frameCount;
-    }
-
-    public long getArchiveSize() {
-        return archiveSize;
-    }
-
-    public void setArchiveSize(long archiveSize) {
-        this.archiveSize = archiveSize;
-    }
 }

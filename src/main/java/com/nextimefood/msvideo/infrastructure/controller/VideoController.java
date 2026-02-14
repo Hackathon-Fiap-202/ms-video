@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/videos")
 public class VideoController {
 
-    private static final Logger logger = LoggerFactory.getLogger(VideoController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(VideoController.class);
 
     private final VideoUploadUseCase videoUploadUseCase;
     private final VideoDownloadUseCase videoDownloadUseCase;
@@ -33,13 +33,13 @@ public class VideoController {
     @PostMapping("/upload")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public String handleVideoUpload(@RequestParam("file") MultipartFile file) {
-        logger.info("Received upload request for file: {}", file.getOriginalFilename());
+        LOGGER.info("Received upload request for file: {}", file.getOriginalFilename());
         return videoUploadUseCase.upload(file);
     }
 
     @GetMapping("/download/{key}")
     public ResponseEntity<VideoDownloadResponse> getDownloadUrl(@PathVariable String key) {
-        logger.info("Received download request for video key: {}", key);
+        LOGGER.info("Received download request for video key: {}", key);
         final var response = videoDownloadUseCase.generateDownloadUrl(key);
         return ResponseEntity.ok(response);
     }

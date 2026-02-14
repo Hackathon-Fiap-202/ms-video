@@ -21,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class VideoUploadUseCase {
 
-    private static final Logger logger = LoggerFactory.getLogger(VideoUploadUseCase.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(VideoUploadUseCase.class);
 
     private final VideoStoragePort storage;
     private final MessagePublisherPort publisher;
@@ -41,46 +41,46 @@ public class VideoUploadUseCase {
     }
 
     public String upload(MultipartFile file) {
-        logger.info("Starting video upload process for file: {}", file.getOriginalFilename());
+        LOGGER.info("Starting video upload process for file: {}", file.getOriginalFilename());
         
         validateFile(file);
         
         try {
             final var key = generateUniqueKey(file.getOriginalFilename());
-            logger.debug("Generated unique key for video: {}", key);
+            LOGGER.debug("Generated unique key for video: {}", key);
             
-            var doc = saveReceived(file, key);
+            final var doc = saveReceived(file, key);
             uploadFile(file, key);
             publishMessage(key);
             updateStatus(doc, ProcessStatus.PROCESSING);
             
-            logger.info("Video upload completed successfully with key: {}", key);
+            LOGGER.info("Video upload completed successfully with key: {}", key);
             return key;
         } catch (IOException e) {
-            logger.error("Failed to upload video file: {}", file.getOriginalFilename(), e);
+            LOGGER.error("Failed to upload video file: {}", file.getOriginalFilename(), e);
             throw new VideoUploadException("Erro ao fazer upload do vídeo", e);
         } catch (Exception e) {
-            logger.error("Unexpected error during video upload: {}", file.getOriginalFilename(), e);
+            LOGGER.error("Unexpected error during video upload: {}", file.getOriginalFilename(), e);
             throw new VideoUploadException("Erro inesperado ao processar upload do vídeo", e);
         }
     }
 
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            logger.warn("Attempted to upload empty file");
+            LOGGER.warn("Attempted to upload empty file");
             throw new InvalidFileException("Arquivo vazio");
         }
         
         if (file.getOriginalFilename() == null || file.getOriginalFilename().isBlank()) {
-            logger.warn("Attempted to upload file without name");
+            LOGGER.warn("Attempted to upload file without name");
             throw new InvalidFileException("Nome do arquivo inválido");
         }
     }
 
     private VideoDocument saveReceived(MultipartFile file, String key) {
-        logger.debug("Saving video document with status RECEIVED for key: {}", key);
-        var request = new VideoUploadRequest(file.getOriginalFilename(), file.getContentType(), file.getSize());
-        VideoDocument doc = mapper.toDocument(request);
+        LOGGER.debug("Saving video document with status RECEIVED for key: {}", key);
+        final var request = new VideoUploadRequest(file.getOriginalFilename(), file.getContentType(), file.getSize());
+        final var doc = mapper.toDocument(request);
         doc.setBucket(bucketName);
         doc.setKey(key);
         doc.setStatus(ProcessStatus.RECEIVED);
@@ -88,20 +88,20 @@ public class VideoUploadUseCase {
     }
 
     private void uploadFile(MultipartFile file, String key) throws IOException {
-        logger.debug("Uploading file to S3 bucket: {} with key: {}", bucketName, key);
+        LOGGER.debug("Uploading file to S3 bucket: {} with key: {}", bucketName, key);
         storage.upload(bucketName, key, file.getInputStream());
-        logger.debug("File uploaded successfully to S3");
+        LOGGER.debug("File uploaded successfully to S3");
     }
 
     private void publishMessage(String key) {
-        logger.debug("Publishing message to video process command queue for key: {}", key);
-        var payload = new VideoProcessMessage(bucketName, key);
+        LOGGER.debug("Publishing message to video process command queue for key: {}", key);
+        final var payload = new VideoProcessMessage(bucketName, key);
         publisher.publish(videoProcessCommandQueue, payload);
-        logger.debug("Message published successfully");
+        LOGGER.debug("Message published successfully");
     }
 
     private void updateStatus(VideoDocument doc, ProcessStatus status) {
-        logger.debug("Updating video status to: {} for key: {}", status, doc.getKey());
+        LOGGER.debug("Updating video status to: {} for key: {}", status, doc.getKey());
         doc.setStatus(status);
         repository.save(doc);
     }

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class VideoDownloadUseCase {
 
-    private static final Logger logger = LoggerFactory.getLogger(VideoDownloadUseCase.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(VideoDownloadUseCase.class);
 
     private final VideoRepositoryPort repository;
     private final VideoStoragePort storage;
@@ -23,12 +23,12 @@ public class VideoDownloadUseCase {
     }
 
     public VideoDownloadResponse generateDownloadUrl(String key) {
-        logger.info("Generating download URL for video key: {}", key);
+        LOGGER.info("Generating download URL for video key: {}", key);
         
         final var videoOpt = repository.findByKey(key);
         
         if (videoOpt.isEmpty()) {
-            logger.warn("Video not found with key: {}", key);
+            LOGGER.warn("Video not found with key: {}", key);
             throw new VideoNotFoundException(key);
         }
 
@@ -36,7 +36,7 @@ public class VideoDownloadUseCase {
         final var duration = Duration.ofHours(1);
         final var presignedUrl = storage.generatePresignedUrl(video.getBucket(), video.getKey(), duration);
 
-        logger.info("Successfully generated download URL for video key: {}", key);
+        LOGGER.info("Successfully generated download URL for video key: {}", key);
         
         return new VideoDownloadResponse(
             video.getId(),

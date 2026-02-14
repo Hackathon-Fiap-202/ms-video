@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Primary
 public class SqsMessagePublisherAdapter implements MessagePublisherPort {
 
-    private static final Logger logger = LoggerFactory.getLogger(SqsMessagePublisherAdapter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SqsMessagePublisherAdapter.class);
 
     private final SqsTemplate sqsTemplate;
     private final ObjectMapper objectMapper;
@@ -26,24 +26,24 @@ public class SqsMessagePublisherAdapter implements MessagePublisherPort {
 
     @Override
     public void publish(String queueName, Object payload) {
-        logger.info("Publishing message to queue: {}", queueName);
-        logger.debug("Message payload type: {}", payload.getClass().getSimpleName());
+        LOGGER.info("Publishing message to queue: {}", queueName);
+        LOGGER.debug("Message payload type: {}", payload.getClass().getSimpleName());
 
         try {
-            String body = toJson(payload);
-            logger.debug("Serialized message body: {}", body);
+            final var body = toJson(payload);
+            LOGGER.debug("Serialized message body: {}", body);
 
             sqsTemplate.send(to -> to
                     .queue(queueName)
                     .payload(body)
             );
 
-            logger.info("Message published successfully to queue: {}", queueName);
+            LOGGER.info("Message published successfully to queue: {}", queueName);
         } catch (MessagePublishException e) {
-            logger.error("Failed to publish message to queue: {}", queueName, e);
+            LOGGER.error("Failed to publish message to queue: {}", queueName, e);
             throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error while publishing message to queue: {}", queueName, e);
+            LOGGER.error("Unexpected error while publishing message to queue: {}", queueName, e);
             throw new MessagePublishException("Erro inesperado ao publicar mensagem na fila " + queueName, e);
         }
     }
@@ -52,7 +52,7 @@ public class SqsMessagePublisherAdapter implements MessagePublisherPort {
         try {
             return objectMapper.writeValueAsString(payload);
         } catch (JsonProcessingException e) {
-            logger.error("Failed to serialize payload to JSON: {}", payload.getClass().getSimpleName(), e);
+            LOGGER.error("Failed to serialize payload to JSON: {}", payload.getClass().getSimpleName(), e);
             throw new MessagePublishException("Erro ao serializar payload para JSON", e);
         }
     }

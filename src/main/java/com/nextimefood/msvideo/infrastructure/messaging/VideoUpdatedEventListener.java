@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class VideoUpdatedEventListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(VideoUpdatedEventListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(VideoUpdatedEventListener.class);
 
     private final ObjectMapper objectMapper;
     private final VideoStatusUpdateUseCase videoStatusUpdateUseCase;
@@ -25,32 +25,32 @@ public class VideoUpdatedEventListener {
 
     @SqsListener("${spring.cloud.sqs.queues.video-updated-event}")
     public void listen(String message) {
-        logger.info("Received message from video-updated-event queue");
-        logger.debug("Message content: {}", message);
+        LOGGER.info("Received message from video-updated-event queue");
+        LOGGER.debug("Message content: {}", message);
 
         try {
             final var event = deserializeMessage(message);
             
-            logger.info("Processing video updated event for videoKey: {}", event.getVideoKey());
+            LOGGER.info("Processing video updated event for videoKey: {}", event.getVideoKey());
 
             videoStatusUpdateUseCase.processVideoStatusUpdate(event);
 
-            logger.info("Successfully processed video updated event for videoKey: {}", event.getVideoKey());
+            LOGGER.info("Successfully processed video updated event for videoKey: {}", event.getVideoKey());
 
         } catch (JsonProcessingException e) {
-            logger.error("Failed to deserialize message from video-updated-event queue. Invalid JSON format: {}", message, e);
+            LOGGER.error("Failed to deserialize message from video-updated-event queue. Invalid JSON format: {}", message, e);
             throw new MessageProcessingException("Erro ao deserializar mensagem do evento de vídeo atualizado", e);
         } catch (MessageProcessingException e) {
-            logger.error("Message processing exception occurred: {}", e.getMessage(), e);
+            LOGGER.error("Message processing exception occurred: {}", e.getMessage(), e);
             throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error processing video updated event message: {}", message, e);
+            LOGGER.error("Unexpected error processing video updated event message: {}", message, e);
             throw new MessageProcessingException("Erro inesperado ao processar evento de vídeo atualizado", e);
         }
     }
 
     private VideoStatusEventDTO deserializeMessage(String message) throws JsonProcessingException {
-        logger.debug("Deserializing message to VideoStatusEventDTO");
+        LOGGER.debug("Deserializing message to VideoStatusEventDTO");
         return objectMapper.readValue(message, VideoStatusEventDTO.class);
     }
 }

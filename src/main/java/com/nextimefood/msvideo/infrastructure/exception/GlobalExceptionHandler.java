@@ -15,13 +15,13 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private static final String ERROR_TIMESTAMP = "timestamp";
     private static final String ERROR_VIDEO_KEY = "videoKey";
 
     @ExceptionHandler(VideoNotFoundException.class)
     public ProblemDetail handleVideoNotFoundException(VideoNotFoundException ex) {
-        logger.error("Video not found exception: {}", ex.getMessage());
+        LOGGER.error("Video not found exception: {}", ex.getMessage());
         
         final var problemDetail = ProblemDetail.forStatusAndDetail(
             HttpStatus.NOT_FOUND,
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidFileException.class)
     public ProblemDetail handleInvalidFileException(InvalidFileException ex) {
-        logger.error("Invalid file exception: {}", ex.getMessage());
+        LOGGER.error("Invalid file exception: {}", ex.getMessage());
         
         final var problemDetail = ProblemDetail.forStatusAndDetail(
             HttpStatus.BAD_REQUEST,
@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(VideoUploadException.class)
     public ProblemDetail handleVideoUploadException(VideoUploadException ex) {
-        logger.error("Video upload exception: {}", ex.getMessage(), ex);
+        LOGGER.error("Video upload exception: {}", ex.getMessage(), ex);
         
         final var problemDetail = ProblemDetail.forStatusAndDetail(
             HttpStatus.INTERNAL_SERVER_ERROR,
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ProblemDetail handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
-        logger.error("Max upload size exceeded: {}", ex.getMessage());
+        LOGGER.error("Max upload size exceeded: {}", ex.getMessage());
         
         final var problemDetail = ProblemDetail.forStatusAndDetail(
             HttpStatus.PAYLOAD_TOO_LARGE,
@@ -82,7 +82,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleIllegalArgumentException(IllegalArgumentException ex) {
-        logger.error("Illegal argument exception: {}", ex.getMessage());
+        LOGGER.error("Illegal argument exception: {}", ex.getMessage());
         
         final var problemDetail = ProblemDetail.forStatusAndDetail(
             HttpStatus.BAD_REQUEST,
@@ -97,7 +97,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGenericException(Exception ex) {
-        logger.error("Unexpected exception occurred: {}", ex.getMessage(), ex);
+        LOGGER.error("Unexpected exception occurred: {}", ex.getMessage(), ex);
         
         final var problemDetail = ProblemDetail.forStatusAndDetail(
             HttpStatus.INTERNAL_SERVER_ERROR,
