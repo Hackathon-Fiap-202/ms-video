@@ -1,9 +1,10 @@
 package com.nextimefood.msvideo.infrastructure.messaging;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nextimefood.msvideo.application.dto.VideoUpdatedEvent;
-import com.nextimefood.msvideo.application.ports.outgoing.MessagePublisherPort;
-import com.nextimefood.msvideo.application.ports.outgoing.VideoRepositoryPort;
+import com.nextimefood.msvideo.application.dto.VideoStatusEventDTO;
+import com.nextimefood.msvideo.application.usecases.VideoStatusUpdateUseCase;
+import com.nextimefood.msvideo.domain.exception.MessageProcessingException;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,42 +16,41 @@ public class VideoUpdatedEventListener {
     private static final Logger logger = LoggerFactory.getLogger(VideoUpdatedEventListener.class);
 
     private final ObjectMapper objectMapper;
-    private final VideoRepositoryPort repository;
-    private final MessagePublisherPort publisher;
+    private final VideoStatusUpdateUseCase videoStatusUpdateUseCase;
 
-    @org.springframework.beans.factory.annotation.Value("${spring.cloud.sqs.queues.video-process-event}")
-    private String videoProcessedEventQueue;
-
-    public VideoUpdatedEventListener(ObjectMapper objectMapper, VideoRepositoryPort repository, MessagePublisherPort publisher) {
+    public VideoUpdatedEventListener(ObjectMapper objectMapper, VideoStatusUpdateUseCase videoStatusUpdateUseCase) {
         this.objectMapper = objectMapper;
-        this.repository = repository;
-        this.publisher = publisher;
+        this.videoStatusUpdateUseCase = videoStatusUpdateUseCase;
     }
 
     @SqsListener("${spring.cloud.sqs.queues.video-updated-event}")
     public void listen(String message) {
+        logger.info("Received message from video-updated-event queue");
+        logger.debug("Message content: {}", message);
+
         try {
-            logger.info("Received message from video-updated-event queue: {}", message);
+            final var event = deserializeMessage(message);
+            
+            logger.info("Processing video updated event for videoKey: {}", event.getVideoKey());
 
-            VideoUpdatedEvent event = objectMapper.readValue(message, VideoUpdatedEvent.class);
+            videoStatusUpdateUseCase.processVideoStatusUpdate(event);
 
-            logger.info("Processing video updated event: {}", event);
+            logger.info("Successfully processed video updated event for videoKey: {}", event.getVideoKey());
 
-            processVideoUpdatedEvent(event);
-
-            logger.info("Successfully processed video updated event for videoId: {}", event.getVideoId());
-
+        } catch (JsonProcessingException e) {
+            logger.error("Failed to deserialize message from video-updated-event queue. Invalid JSON format: {}", message, e);
+            throw new MessageProcessingException("Erro ao deserializar mensagem do evento de vídeo atualizado", e);
+        } catch (MessageProcessingException e) {
+            logger.error("Message processing exception occurred: {}", e.getMessage(), e);
+            throw e;
         } catch (Exception e) {
-            logger.error("Error processing video updated event message: {}", message, e);
-            throw new RuntimeException("Failed to process video updated event", e);
+            logger.error("Unexpected error processing video updated event message: {}", message, e);
+            throw new MessageProcessingException("Erro inesperado ao processar evento de vídeo atualizado", e);
         }
     }
 
-    private void processVideoUpdatedEvent(VideoUpdatedEvent event) {
-        repository.findByKey(event.getVideoId()).ifPresentOrElse(video -> {
-            video.setStatus(event.getStatus());
-            repository.save(video);
-            publisher.publish(videoProcessedEventQueue, event);
-        }, () -> logger.error("Video not found with key: {}", event.getVideoId()));
+    private VideoStatusEventDTO deserializeMessage(String message) throws JsonProcessingException {
+        logger.debug("Deserializing message to VideoStatusEventDTO");
+        return objectMapper.readValue(message, VideoStatusEventDTO.class);
     }
 }

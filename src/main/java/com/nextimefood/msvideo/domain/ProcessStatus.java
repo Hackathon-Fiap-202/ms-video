@@ -1,6 +1,6 @@
 package com.nextimefood.msvideo.domain;
 
-public enum VideoStatus {
+public enum ProcessStatus {
     RECEIVED,
     PROCESSING,
     PROCESSED,

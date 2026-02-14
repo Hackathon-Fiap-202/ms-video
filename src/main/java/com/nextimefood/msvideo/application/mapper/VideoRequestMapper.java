@@ -12,6 +12,10 @@ public interface VideoRequestMapper {
     @Mapping(target = "bucket", ignore = true)
     @Mapping(target = "key", ignore = true)
     @Mapping(target = "status", constant = "RECEIVED")
+    @Mapping(target = "createdAt", expression = "java(java.time.Instant.now())")
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "frameCount", ignore = true)
+    @Mapping(target = "archiveSize", ignore = true)
     VideoDocument toDocument(VideoUploadRequest request);
 
 }
