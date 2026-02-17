@@ -12,7 +12,13 @@ infra/
 │   ├── configmap.yaml
 │   ├── externalsecret.yaml
 │   ├── service-account.yaml
-│   └── hpa.yaml
+│   ├── hpa.yaml
+│   └── db/          # Configurações MongoDB (opcional)
+│       ├── statefulset.yaml
+│       ├── service.yaml
+│       ├── pvc.yaml
+│       ├── mongodb-external-secret.yaml
+│       └── README.md
 └── terraform/        # Configuração Terraform
     ├── provider.tf
     ├── variables.tf
@@ -124,14 +130,29 @@ kubectl logs -l app=ms-video -f
 kubectl get hpa ms-video-hpa
 ```
 
-## Secrets no AWS SSM
+## MongoDB
 
-Os seguintes parâmetros devem estar configurados no SSM:
+O ms-video suporta duas configurações de MongoDB:
 
+### Opção 1: MongoDB Atlas (Recomendado)
+
+Parâmetros no SSM:
 ```
-/ms-video/mongodb/uri
-/ms-video/mongodb/database
+/ms-video/mongodb/uri       # Connection string do Atlas
+/ms-video/mongodb/database  # Nome do database
 ```
+
+### Opção 2: MongoDB no Cluster K8s (Dev/Testing)
+
+Use os manifestos em `k8s/db/` para deploy de MongoDB no cluster.
+
+Parâmetros no SSM:
+```
+/ms-video/mongodb/username
+/ms-video/mongodb/password
+```
+
+Consulte `k8s/db/README.md` para mais detalhes.
 
 ## Dependências
 

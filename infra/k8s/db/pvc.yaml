@@ -1,0 +1,16 @@
+# PersistentVolumeClaim para MongoDB
+# Nota: Quando usar StatefulSet com volumeClaimTemplates, este arquivo não é necessário
+# Este PVC é útil apenas se você criar um Deployment ao invés de StatefulSet
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: gp3
+  resources:
+    requests:
+      storage: 10Gi

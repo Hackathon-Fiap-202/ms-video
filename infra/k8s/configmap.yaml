@@ -7,6 +7,6 @@ data:
   SPRING_PROFILES_ACTIVE: dev
   AWS_REGION: us-east-1
   SPRING_CLOUD_S3_BUCKET_NAME: nextime-food-videos
-  SPRING_CLOUD_SQS_QUEUES_VIDEO_PROCESS_COMMAND: https://sqs.us-east-1.amazonaws.com/500782030170/video-process-command
-  SPRING_CLOUD_SQS_QUEUES_VIDEO_UPDATED_EVENT: https://sqs.us-east-1.amazonaws.com/500782030170/video-updated-event
-  SPRING_CLOUD_SQS_QUEUES_VIDEO_PROCESS_EVENT: https://sqs.us-east-1.amazonaws.com/500782030170/video-process-event
+  SPRING_CLOUD_SQS_QUEUES_VIDEO_PROCESS_COMMAND: video-process-command
+  SPRING_CLOUD_SQS_QUEUES_VIDEO_UPDATED_EVENT: video-updated-event
+  SPRING_CLOUD_SQS_QUEUES_VIDEO_PROCESS_EVENT: video-process-event
