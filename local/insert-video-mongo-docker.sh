@@ -14,9 +14,8 @@ docker exec ${CONTAINER_NAME} mongosh -u ${MONGO_USER} -p ${MONGO_PASSWORD} --au
 // Remove vídeo existente com mesma key (evita duplicata)
 db.videos.deleteOne({ key: "start-process/abc123-def456-789.mp4" });
 
-// Insere novo vídeo
-db.videos.insertOne({
-  _id: "507f1f77bcf86cd799439011",
+// Insere novo vídeo (MongoDB gera _id automaticamente)
+const result = db.videos.insertOne({
   bucket: "msvideo-bucket",
   key: "start-process/abc123-def456-789.mp4",
   originalFilename: "video-teste.mp4",
@@ -28,7 +27,9 @@ db.videos.insertOne({
   frameCount: 0,
   archiveSize: NumberLong(0),
   _class: "com.nextimefood.msvideo.infrastructure.persistence.VideoDocument"
-})
+});
+
+print("Inserted ID: " + result.insertedId);
 '
 
 if [ $? -eq 0 ]; then
@@ -36,13 +37,13 @@ if [ $? -eq 0 ]; then
   echo "✅ Vídeo inserido com sucesso no MongoDB!"
   echo ""
   echo "Detalhes do vídeo:"
-  echo "  ID: 507f1f77bcf86cd799439011"
   echo "  Key: start-process/abc123-def456-789.mp4"
   echo "  Status: PROCESSING"
   echo ""
   echo "Agora você pode executar:"
   echo "  sh local/publish-video-updated-event.sh        # Para marcar como PROCESSED"
   echo "  sh local/publish-video-updated-event-failed.sh # Para marcar como FAILED"
+  echo "  sh local/query-videos-mongo-docker.sh          # Para ver o vídeo no banco"
 else
   echo ""
   echo "❌ Erro ao inserir vídeo no MongoDB"

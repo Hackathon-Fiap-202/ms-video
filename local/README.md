@@ -1,31 +1,53 @@
-# Scripts Locais para Testes
+# Scripts Locais - ms-video
 
-Este diretório contém scripts para testes locais do ms-video usando LocalStack.
+Scripts utilitários para desenvolvimento e testes locais do serviço ms-video.
 
-## Pré-requisitos
+## 📋 Pré-requisitos
 
-- Docker e Docker Compose rodando
-- LocalStack configurado (docker-compose up)
-- AWS CLI instalado
-
+### Docker
+Certifique-se de que os seguintes containers estão rodando:
 ```bash
-# Instalar AWS CLI (se ainda não tiver)
-# Windows (via chocolatey)
-choco install awscli
-
-# Linux/Mac
-pip install awscli
+docker ps
 ```
 
-## Scripts Disponíveis
+Você deve ver:
+- **LocalStack** (porta 4566) - Simula serviços AWS (S3, SQS)
+- **MongoDB** (porta 27017) - Banco de dados
 
-### Scripts SQS
+### AWS CLI
+Necessário para interagir com LocalStack:
+```bash
+aws --version
+```
 
-#### publish-video-updated-event.sh
+Se não estiver instalado:
+- Windows: [Download AWS CLI](https://aws.amazon.com/cli/)
+- macOS: `brew install awscli`
+- Linux: `sudo apt install awscli` ou `pip install awscli`
 
-Publica um evento de **sucesso** na fila `video-updated-event` simulando que o processamento do vídeo foi concluído com êxito.
+## 🚀 Scripts Disponíveis
 
-**Payload:**
+### AWS LocalStack
+
+#### `init-aws.sh`
+Inicializa recursos AWS no LocalStack (buckets S3, filas SQS).
+
+```bash
+sh local/init-aws.sh
+```
+
+**O que faz:**
+- Cria bucket S3: `msvideo-bucket`
+- Cria filas SQS: `video-updated-event`, `video-processed-event`, `video-failed-event`
+
+#### `publish-video-updated-event.sh`
+Publica uma mensagem de sucesso na fila `video-updated-event`.
+
+```bash
+sh local/publish-video-updated-event.sh
+```
+
+**Payload enviado:**
 ```json
 {
   "videoKey": "start-process/abc123-def456-789.mp4",
@@ -37,17 +59,14 @@ Publica um evento de **sucesso** na fila `video-updated-event` simulando que o p
 }
 ```
 
-**Uso:**
+#### `publish-video-updated-event-failed.sh`
+Publica uma mensagem de falha na fila `video-updated-event`.
+
 ```bash
-chmod +x publish-video-updated-event.sh
-./publish-video-updated-event.sh
+sh local/publish-video-updated-event-failed.sh
 ```
 
-#### publish-video-updated-event-failed.sh
-
-Publica um evento de **falha** na fila `video-updated-event` simulando que o processamento do vídeo falhou.
-
-**Payload:**
+**Payload enviado:**
 ```json
 {
   "videoKey": "start-process/abc123-def456-789.mp4",
@@ -59,224 +78,171 @@ Publica um evento de **falha** na fila `video-updated-event` simulando que o pro
 }
 ```
 
-**Uso:**
+### MongoDB
+
+#### `insert-video-mongo-docker.sh`
+Insere um vídeo de teste no MongoDB.
+
 ```bash
-chmod +x publish-video-updated-event-failed.sh
-./publish-video-updated-event-failed.sh
+sh local/insert-video-mongo-docker.sh
 ```
 
-### Scripts MongoDB
+**Registro inserido:**
+- Key: `start-process/abc123-def456-789.mp4`
+- Status: `PROCESSING`
+- Outros campos: bucket, originalFilename, contentType, size, timestamps
 
-#### MongoDB Local (mongosh instalado)
+**Nota:** Remove automaticamente registros com a mesma `key` antes de inserir.
 
-##### insert-video-mongo.sh
+#### `query-videos-mongo-docker.sh`
+Lista todos os vídeos no MongoDB.
 
-Insere um vídeo de teste diretamente no MongoDB com status `PROCESSING`.
-
-**Uso:**
 ```bash
-chmod +x insert-video-mongo.sh
-./insert-video-mongo.sh
+sh local/query-videos-mongo-docker.sh
 ```
 
-Após inserir, você pode testar os eventos SQS para atualizar o status do vídeo.
+#### `delete-videos-mongo-docker.sh`
+Remove todos os vídeos do MongoDB.
 
-##### query-videos-mongo.sh
-
-Consulta todos os vídeos no MongoDB.
-
-**Uso:**
 ```bash
-chmod +x query-videos-mongo.sh
-./query-videos-mongo.sh
+sh local/delete-videos-mongo-docker.sh
 ```
 
-##### delete-videos-mongo.sh
+**⚠️ Cuidado:** Remove TODOS os documentos da collection `videos`.
 
-Remove todos os vídeos do MongoDB (útil para limpar dados de teste).
+#### `show-indexes-mongo-docker.sh`
+Exibe os índices da collection `videos` e lista todos os documentos.
 
-**Uso:**
 ```bash
-chmod +x delete-videos-mongo.sh
-./delete-videos-mongo.sh
+sh local/show-indexes-mongo-docker.sh
 ```
 
-#### MongoDB em Docker (recomendado)
+**Útil para:**
+- Verificar se o índice único em `key` está aplicado
+- Ver todos os documentos com `_id`, `key` e `status`
 
-Se o MongoDB está rodando em um container Docker, use as versões `-docker` dos scripts:
+#### `count-videos-by-key-docker.sh`
+Conta documentos agrupados por `key`, exibindo apenas duplicatas.
 
-##### insert-video-mongo-docker.sh
-
-Insere um vídeo via Docker.
-
-**Uso:**
 ```bash
-chmod +x insert-video-mongo-docker.sh
-./insert-video-mongo-docker.sh
+sh local/count-videos-by-key-docker.sh
 ```
 
-##### query-videos-mongo-docker.sh
+**Útil para:**
+- Diagnosticar problemas de duplicatas
+- Verificar integridade da constraint única
 
-Consulta vídeos via Docker.
+#### `remove-duplicates-by-key-docker.sh`
+Remove documentos duplicados mantendo apenas o mais recente por `key`.
 
-**Uso:**
 ```bash
-chmod +x query-videos-mongo-docker.sh
-./query-videos-mongo-docker.sh
+sh local/remove-duplicates-by-key-docker.sh
 ```
 
-##### delete-videos-mongo-docker.sh
+**O que faz:**
+- Agrupa documentos por `key`
+- Para cada grupo com mais de 1 documento:
+  - Ordena por `updatedAt` (decrescente)
+  - Remove todos exceto o mais recente
 
-Remove vídeos via Docker.
+## 🔄 Fluxo de Teste Completo
 
-**Uso:**
+### 1. Inicializar Ambiente
 ```bash
-chmod +x delete-videos-mongo-docker.sh
-./delete-videos-mongo-docker.sh
+# Inicializa recursos AWS
+sh local/init-aws.sh
 ```
 
-##### fix-duplicates-mongo-docker.sh
-
-Remove duplicatas e cria índice único no campo `key` (execute se encontrar erro de "non unique result").
-
-**Uso:**
+### 2. Preparar Dados
 ```bash
-chmod +x fix-duplicates-mongo-docker.sh
-./fix-duplicates-mongo-docker.sh
+# Insere vídeo no MongoDB
+sh local/insert-video-mongo-docker.sh
+
+# Verifica se foi inserido
+sh local/query-videos-mongo-docker.sh
 ```
 
-**Nota:** Os scripts Docker assumem que o container MongoDB se chama `mongodb`. Se o seu container tem outro nome, edite a variável `CONTAINER_NAME` nos scripts.
-
-## Campos do Evento
-
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| `videoKey` | String | Chave do vídeo no S3 (ex: start-process/uuid.mp4) |
-| `success` | boolean | Indica se o processamento foi bem-sucedido |
-| `status` | String | Status do processo: RECEIVED, PROCESSING, PROCESSED, FAILED |
-| `frameCount` | int | Número de frames extraídos (0 em caso de falha) |
-| `archiveSize` | long | Tamanho do arquivo compactado em bytes (0 em caso de falha) |
-| `timestamp` | String | Timestamp ISO-8601 do evento |
-
-## Status Possíveis
-
-- **RECEIVED**: Vídeo recebido, aguardando processamento
-- **PROCESSING**: Vídeo em processamento
-- **PROCESSED**: Vídeo processado com sucesso
-- **FAILED**: Falha no processamento
-
-## Verificando Logs
-
-Para verificar se a mensagem foi processada:
-
+### 3. Testar Processamento
 ```bash
-# Ver logs da aplicação
-docker logs ms-video -f
+# Envia evento de sucesso
+sh local/publish-video-updated-event.sh
 
-# Ver mensagens na fila (antes de serem consumidas)
-awslocal sqs receive-message \
-  --queue-url "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/video-updated-event"
+# Aguarda alguns segundos e verifica atualização
+sleep 5
+sh local/query-videos-mongo-docker.sh
 ```
 
-## Testando o Fluxo Completo
+Resultado esperado:
+- Status alterado de `PROCESSING` para `PROCESSED`
+- Campos `frameCount` e `archiveSize` preenchidos
+- `updatedAt` atualizado
 
-### Opção 1: Fluxo completo com Upload
-
-1. **Upload de vídeo** (via endpoint POST /videos/upload)
-2. **Processamento** (simulado pelo ms-process-video)
-3. **Publicação do evento** (usando os scripts deste diretório)
-4. **Atualização do status** (consumido pelo VideoUpdatedEventListener)
-5. **Download** (via endpoint GET /videos/download/{key})
-
-### Opção 2: Teste rápido com dados mockados
-
-1. **Inserir vídeo no MongoDB**:
-   ```bash
-   # Se MongoDB local
-   sh local/insert-video-mongo.sh
-   
-   # Se MongoDB em Docker (recomendado)
-   sh local/insert-video-mongo-docker.sh
-   ```
-
-2. **Publicar evento de processamento**:
-   ```bash
-   # Sucesso
-   sh local/publish-video-updated-event.sh
-   
-   # Ou falha
-   sh local/publish-video-updated-event-failed.sh
-   ```
-
-3. **Verificar atualização**:
-   ```bash
-   # Se MongoDB local
-   sh local/query-videos-mongo.sh
-   
-   # Se MongoDB em Docker (recomendado)
-   sh local/query-videos-mongo-docker.sh
-   ```
-
-4. **Limpar dados**:
-   ```bash
-   # Se MongoDB local
-   sh local/delete-videos-mongo.sh
-   
-   # Se MongoDB em Docker (recomendado)
-   sh local/delete-videos-mongo-docker.sh
-   ```
-
-## Troubleshooting
-
-### Erro: aws: command not found
-Instale o AWS CLI:
+### 4. Testar Falha
 ```bash
-pip install awscli
+# Insere novo vídeo
+sh local/insert-video-mongo-docker.sh
+
+# Envia evento de falha
+sh local/publish-video-updated-event-failed.sh
+
+# Verifica atualização
+sh local/query-videos-mongo-docker.sh
 ```
 
-### Erro: Queue does not exist
-Verifique se o LocalStack está rodando e as filas foram criadas:
+Resultado esperado:
+- Status alterado de `PROCESSING` para `FAILED`
+
+## 🔧 Configurações
+
+### Variáveis de Ambiente (AWS)
+Os scripts de publicação SQS definem automaticamente:
 ```bash
-aws --endpoint-url=http://localhost:4566 sqs list-queues
+export AWS_ACCESS_KEY_ID=test
+export AWS_SECRET_ACCESS_KEY=test
+export AWS_DEFAULT_REGION=us-east-1
 ```
 
-### Erro: Could not connect to the endpoint URL
-Certifique-se que o LocalStack está rodando:
+### Variáveis de Ambiente (MongoDB)
+Os scripts MongoDB usam:
 ```bash
-docker ps | grep localstack
+CONTAINER_NAME="mongo"
+MONGO_USER="root"
+MONGO_PASSWORD="password"
+MONGO_DB="msvideo"
 ```
 
-Se não estiver rodando:
-```bash
-docker-compose up -d
+## 🐛 Troubleshooting
+
+### AWS: Unable to locate credentials
+**Erro:**
+```
+Unable to locate credentials. You can configure credentials by running "aws configure".
 ```
 
-### Permissões no script
+**Causa:** Variáveis de ambiente AWS não definidas.
+
+**Solução:** Os scripts `publish-*.sh` já definem essas variáveis. Se persistir, execute manualmente:
 ```bash
-chmod +x *.sh
-```
-
-### Windows: bash not found
-Use Git Bash ou WSL para executar os scripts bash no Windows.
-
-### MongoDB: mongosh not found
-Instale o MongoDB Shell:
-```bash
-# Windows (via chocolatey)
-choco install mongodb-shell
-
-# Mac
-brew install mongosh
-
-# Linux
-# Veja: https://www.mongodb.com/docs/mongodb-shell/install/
+export AWS_ACCESS_KEY_ID=test
+export AWS_SECRET_ACCESS_KEY=test
+export AWS_DEFAULT_REGION=us-east-1
 ```
 
 ### MongoDB: Authentication failed
-Verifique se as credenciais no script estão corretas:
-- User: root
-- Password: password
-- Auth DB: admin
+**Erro:**
+```
+Command find requires authentication
+```
+
+**Causa:** Credenciais incorretas ou formato de URI inválido.
+
+**Solução:** Verifique se a aplicação está usando:
+```yaml
+spring:
+  data:
+    mongodb:
+      uri: mongodb://root:password@localhost:27017/msvideo?authSource=admin
+```
 
 Ou ajuste as variáveis no script conforme seu ambiente.
 
@@ -286,12 +252,35 @@ Verifique o nome do container MongoDB:
 docker ps | grep mongo
 ```
 
-Se o nome for diferente de `mongodb`, edite a variável `CONTAINER_NAME` nos scripts `-docker.sh`.
+Se o nome for diferente de `mongo`, edite a variável `CONTAINER_NAME` nos scripts `-docker.sh`.
 
 ### MongoDB: Query returned non unique result
-Execute o script para limpar duplicatas e criar índice único:
+Execute o script para limpar duplicatas:
 ```bash
-sh local/fix-duplicates-mongo-docker.sh
+sh local/remove-duplicates-by-key-docker.sh
 ```
 
-Isso remove todos os documentos e cria um índice único no campo `key` para evitar duplicatas futuras.
+### MongoDB: DuplicateKeyException durante update
+Se o erro `E11000 duplicate key error` ocorrer durante uma operação de **update** (não insert), o problema é **processamento concorrente** de mensagens duplicadas do SQS.
+
+**Causa**: Duas ou mais mensagens idênticas chegam ao SQS e são processadas simultaneamente por threads diferentes, tentando atualizar o mesmo documento no MongoDB.
+
+**Solução implementada**: Verificação de idempotência no `VideoStatusUpdateUseCase`. Antes de salvar, verifica se o documento já está no estado esperado. Se sim, pula o update e apenas publica o evento de sucesso.
+
+**Diagnóstico**:
+```bash
+# Verifica duplicatas
+sh local/count-videos-by-key-docker.sh
+
+# Remove duplicatas se encontradas
+sh local/remove-duplicates-by-key-docker.sh
+
+# Verifica índices
+sh local/show-indexes-mongo-docker.sh
+```
+
+## 📝 Notas
+
+- Todos os scripts assumem que os containers estão rodando **localmente**
+- Para ambientes remotos, ajuste as variáveis de endpoint/host nos scripts
+- Os scripts usam `mongosh` (MongoDB Shell moderno). Se estiver usando `mongo` antigo, substitua nos scripts
