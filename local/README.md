@@ -19,7 +19,9 @@ pip install awscli
 
 ## Scripts Disponíveis
 
-### publish-video-updated-event.sh
+### Scripts SQS
+
+#### publish-video-updated-event.sh
 
 Publica um evento de **sucesso** na fila `video-updated-event` simulando que o processamento do vídeo foi concluído com êxito.
 
@@ -41,7 +43,7 @@ chmod +x publish-video-updated-event.sh
 ./publish-video-updated-event.sh
 ```
 
-### publish-video-updated-event-failed.sh
+#### publish-video-updated-event-failed.sh
 
 Publica um evento de **falha** na fila `video-updated-event` simulando que o processamento do vídeo falhou.
 
@@ -61,6 +63,40 @@ Publica um evento de **falha** na fila `video-updated-event` simulando que o pro
 ```bash
 chmod +x publish-video-updated-event-failed.sh
 ./publish-video-updated-event-failed.sh
+```
+
+### Scripts MongoDB
+
+#### insert-video-mongo.sh
+
+Insere um vídeo de teste diretamente no MongoDB com status `PROCESSING`.
+
+**Uso:**
+```bash
+chmod +x insert-video-mongo.sh
+./insert-video-mongo.sh
+```
+
+Após inserir, você pode testar os eventos SQS para atualizar o status do vídeo.
+
+#### query-videos-mongo.sh
+
+Consulta todos os vídeos no MongoDB.
+
+**Uso:**
+```bash
+chmod +x query-videos-mongo.sh
+./query-videos-mongo.sh
+```
+
+#### delete-videos-mongo.sh
+
+Remove todos os vídeos do MongoDB (útil para limpar dados de teste).
+
+**Uso:**
+```bash
+chmod +x delete-videos-mongo.sh
+./delete-videos-mongo.sh
 ```
 
 ## Campos do Evento
@@ -96,11 +132,39 @@ awslocal sqs receive-message \
 
 ## Testando o Fluxo Completo
 
+### Opção 1: Fluxo completo com Upload
+
 1. **Upload de vídeo** (via endpoint POST /videos/upload)
 2. **Processamento** (simulado pelo ms-process-video)
 3. **Publicação do evento** (usando os scripts deste diretório)
 4. **Atualização do status** (consumido pelo VideoUpdatedEventListener)
 5. **Download** (via endpoint GET /videos/download/{key})
+
+### Opção 2: Teste rápido com dados mockados
+
+1. **Inserir vídeo no MongoDB**:
+   ```bash
+   sh local/insert-video-mongo.sh
+   ```
+
+2. **Publicar evento de processamento**:
+   ```bash
+   # Sucesso
+   sh local/publish-video-updated-event.sh
+   
+   # Ou falha
+   sh local/publish-video-updated-event-failed.sh
+   ```
+
+3. **Verificar atualização**:
+   ```bash
+   sh local/query-videos-mongo.sh
+   ```
+
+4. **Limpar dados**:
+   ```bash
+   sh local/delete-videos-mongo.sh
+   ```
 
 ## Troubleshooting
 
@@ -134,3 +198,24 @@ chmod +x *.sh
 
 ### Windows: bash not found
 Use Git Bash ou WSL para executar os scripts bash no Windows.
+
+### MongoDB: mongosh not found
+Instale o MongoDB Shell:
+```bash
+# Windows (via chocolatey)
+choco install mongodb-shell
+
+# Mac
+brew install mongosh
+
+# Linux
+# Veja: https://www.mongodb.com/docs/mongodb-shell/install/
+```
+
+### MongoDB: Authentication failed
+Verifique se as credenciais no script estão corretas:
+- User: root
+- Password: password
+- Auth DB: admin
+
+Ou ajuste as variáveis no script conforme seu ambiente.
