@@ -2,7 +2,7 @@
 
 # Script para consultar vídeos no MongoDB via Docker
 
-CONTAINER_NAME="mongodb"
+CONTAINER_NAME="mongo"
 MONGO_USER="root"
 MONGO_PASSWORD="password"
 MONGO_DB="msvideo"

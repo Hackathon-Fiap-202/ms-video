@@ -3,7 +3,7 @@
 # Script para inserir um vídeo diretamente no MongoDB via Docker
 # Simula um vídeo que já foi processado (com falha)
 
-CONTAINER_NAME="mongodb"
+CONTAINER_NAME="mongo"
 MONGO_USER="root"
 MONGO_PASSWORD="password"
 MONGO_DB="msvideo"
@@ -11,6 +11,10 @@ MONGO_DB="msvideo"
 echo "Inserindo vídeo no MongoDB (via Docker)..."
 
 docker exec ${CONTAINER_NAME} mongosh -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin ${MONGO_DB} --eval '
+// Remove vídeo existente com mesma key (evita duplicata)
+db.videos.deleteOne({ key: "start-process/abc123-def456-789.mp4" });
+
+// Insere novo vídeo
 db.videos.insertOne({
   _id: "507f1f77bcf86cd799439011",
   bucket: "msvideo-bucket",

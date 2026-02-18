@@ -2,7 +2,7 @@
 
 # Script para limpar todos os vídeos do MongoDB via Docker
 
-CONTAINER_NAME="mongodb"
+CONTAINER_NAME="mongo"
 MONGO_USER="root"
 MONGO_PASSWORD="password"
 MONGO_DB="msvideo"

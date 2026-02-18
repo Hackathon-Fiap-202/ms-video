@@ -135,6 +135,16 @@ chmod +x delete-videos-mongo-docker.sh
 ./delete-videos-mongo-docker.sh
 ```
 
+##### fix-duplicates-mongo-docker.sh
+
+Remove duplicatas e cria índice único no campo `key` (execute se encontrar erro de "non unique result").
+
+**Uso:**
+```bash
+chmod +x fix-duplicates-mongo-docker.sh
+./fix-duplicates-mongo-docker.sh
+```
+
 **Nota:** Os scripts Docker assumem que o container MongoDB se chama `mongodb`. Se o seu container tem outro nome, edite a variável `CONTAINER_NAME` nos scripts.
 
 ## Campos do Evento
@@ -277,3 +287,11 @@ docker ps | grep mongo
 ```
 
 Se o nome for diferente de `mongodb`, edite a variável `CONTAINER_NAME` nos scripts `-docker.sh`.
+
+### MongoDB: Query returned non unique result
+Execute o script para limpar duplicatas e criar índice único:
+```bash
+sh local/fix-duplicates-mongo-docker.sh
+```
+
+Isso remove todos os documentos e cria um índice único no campo `key` para evitar duplicatas futuras.
