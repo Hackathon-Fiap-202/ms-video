@@ -67,7 +67,9 @@ chmod +x publish-video-updated-event-failed.sh
 
 ### Scripts MongoDB
 
-#### insert-video-mongo.sh
+#### MongoDB Local (mongosh instalado)
+
+##### insert-video-mongo.sh
 
 Insere um vídeo de teste diretamente no MongoDB com status `PROCESSING`.
 
@@ -79,7 +81,7 @@ chmod +x insert-video-mongo.sh
 
 Após inserir, você pode testar os eventos SQS para atualizar o status do vídeo.
 
-#### query-videos-mongo.sh
+##### query-videos-mongo.sh
 
 Consulta todos os vídeos no MongoDB.
 
@@ -89,7 +91,7 @@ chmod +x query-videos-mongo.sh
 ./query-videos-mongo.sh
 ```
 
-#### delete-videos-mongo.sh
+##### delete-videos-mongo.sh
 
 Remove todos os vídeos do MongoDB (útil para limpar dados de teste).
 
@@ -98,6 +100,42 @@ Remove todos os vídeos do MongoDB (útil para limpar dados de teste).
 chmod +x delete-videos-mongo.sh
 ./delete-videos-mongo.sh
 ```
+
+#### MongoDB em Docker (recomendado)
+
+Se o MongoDB está rodando em um container Docker, use as versões `-docker` dos scripts:
+
+##### insert-video-mongo-docker.sh
+
+Insere um vídeo via Docker.
+
+**Uso:**
+```bash
+chmod +x insert-video-mongo-docker.sh
+./insert-video-mongo-docker.sh
+```
+
+##### query-videos-mongo-docker.sh
+
+Consulta vídeos via Docker.
+
+**Uso:**
+```bash
+chmod +x query-videos-mongo-docker.sh
+./query-videos-mongo-docker.sh
+```
+
+##### delete-videos-mongo-docker.sh
+
+Remove vídeos via Docker.
+
+**Uso:**
+```bash
+chmod +x delete-videos-mongo-docker.sh
+./delete-videos-mongo-docker.sh
+```
+
+**Nota:** Os scripts Docker assumem que o container MongoDB se chama `mongodb`. Se o seu container tem outro nome, edite a variável `CONTAINER_NAME` nos scripts.
 
 ## Campos do Evento
 
@@ -144,7 +182,11 @@ awslocal sqs receive-message \
 
 1. **Inserir vídeo no MongoDB**:
    ```bash
+   # Se MongoDB local
    sh local/insert-video-mongo.sh
+   
+   # Se MongoDB em Docker (recomendado)
+   sh local/insert-video-mongo-docker.sh
    ```
 
 2. **Publicar evento de processamento**:
@@ -158,12 +200,20 @@ awslocal sqs receive-message \
 
 3. **Verificar atualização**:
    ```bash
+   # Se MongoDB local
    sh local/query-videos-mongo.sh
+   
+   # Se MongoDB em Docker (recomendado)
+   sh local/query-videos-mongo-docker.sh
    ```
 
 4. **Limpar dados**:
    ```bash
+   # Se MongoDB local
    sh local/delete-videos-mongo.sh
+   
+   # Se MongoDB em Docker (recomendado)
+   sh local/delete-videos-mongo-docker.sh
    ```
 
 ## Troubleshooting
@@ -219,3 +269,11 @@ Verifique se as credenciais no script estão corretas:
 - Auth DB: admin
 
 Ou ajuste as variáveis no script conforme seu ambiente.
+
+### Docker: Container not found
+Verifique o nome do container MongoDB:
+```bash
+docker ps | grep mongo
+```
+
+Se o nome for diferente de `mongodb`, edite a variável `CONTAINER_NAME` nos scripts `-docker.sh`.
