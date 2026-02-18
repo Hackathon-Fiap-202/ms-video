@@ -3,6 +3,11 @@
 QUEUE_NAME="video-updated-event"
 ENDPOINT_URL="http://localhost:4566"
 
+# Configurar credenciais fake para LocalStack (evita warning)
+export AWS_ACCESS_KEY_ID=test
+export AWS_SECRET_ACCESS_KEY=test
+export AWS_DEFAULT_REGION=us-east-1
+
 # Usar AWS CLI com endpoint do LocalStack
 aws sqs send-message \
   --endpoint-url "${ENDPOINT_URL}" \
