@@ -1,0 +1,29 @@
+server:
+  port: ${SERVER_PORT:8090}
+
+spring:
+  application:
+    name: ms-video
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://root:password@localhost:27017/msvideo?authSource=admin}
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10GB
+      max-request-size: 10GB
+  cloud:
+    aws:
+      region:
+        static: ${AWS_REGION:us-east-1}
+    sqs:
+      endpoint: ${SPRING_CLOUD_SQS_ENDPOINT:http://localhost:4566}
+      queues:
+        video-process-event: ${SPRING_CLOUD_SQS_QUEUES_VIDEO_PROCESS_EVENT:video-processed-event}
+        video-process-command: ${SPRING_CLOUD_SQS_QUEUES_VIDEO_PROCESS_COMMAND:video-process-command}
+        video-updated-event: ${SPRING_CLOUD_SQS_QUEUES_VIDEO_UPDATED_EVENT:video-updated-event}
+    s3:
+      endpoint: ${SPRING_CLOUD_S3_ENDPOINT:http://localhost:4566}
+      bucket-name: ${SPRING_CLOUD_S3_BUCKET_NAME:msvideo-bucket}
+      access-key: ${AWS_ACCESS_KEY_ID:test}
+      secret-key: ${AWS_SECRET_ACCESS_KEY:test}
