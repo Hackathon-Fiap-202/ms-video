@@ -10,6 +10,4 @@ MONGO_DB="msvideo"
 echo "📹 Consultando vídeos no MongoDB (via Docker)..."
 echo ""
 
-docker exec -i ${CONTAINER_NAME} mongosh -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin ${MONGO_DB} --quiet <<EOF
-db.videos.find().pretty()
-EOF
+docker exec ${CONTAINER_NAME} mongosh -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin ${MONGO_DB} --quiet --eval 'db.videos.find().pretty()'

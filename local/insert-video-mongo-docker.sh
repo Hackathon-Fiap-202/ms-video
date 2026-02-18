@@ -10,7 +10,7 @@ MONGO_DB="msvideo"
 
 echo "Inserindo vídeo no MongoDB (via Docker)..."
 
-docker exec -i ${CONTAINER_NAME} mongosh -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin ${MONGO_DB} <<EOF
+docker exec ${CONTAINER_NAME} mongosh -u ${MONGO_USER} -p ${MONGO_PASSWORD} --authenticationDatabase admin ${MONGO_DB} --eval '
 db.videos.insertOne({
   _id: "507f1f77bcf86cd799439011",
   bucket: "msvideo-bucket",
@@ -25,7 +25,7 @@ db.videos.insertOne({
   archiveSize: NumberLong(0),
   _class: "com.nextimefood.msvideo.infrastructure.persistence.VideoDocument"
 })
-EOF
+'
 
 if [ $? -eq 0 ]; then
   echo ""
@@ -40,6 +40,7 @@ if [ $? -eq 0 ]; then
   echo "  sh local/publish-video-updated-event.sh        # Para marcar como PROCESSED"
   echo "  sh local/publish-video-updated-event-failed.sh # Para marcar como FAILED"
 else
+  echo ""
   echo "❌ Erro ao inserir vídeo no MongoDB"
   echo ""
   echo "Verifique se:"
