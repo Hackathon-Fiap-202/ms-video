@@ -1,10 +1,12 @@
 #!/bin/bash
 
 QUEUE_NAME="video-updated-event"
+ENDPOINT_URL="http://localhost:4566"
 
-# Usar awslocal para LocalStack - Cenário de FALHA
-awslocal sqs send-message \
-  --queue-url "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/${QUEUE_NAME}" \
+# Usar AWS CLI com endpoint do LocalStack - Cenário de FALHA
+aws sqs send-message \
+  --endpoint-url "${ENDPOINT_URL}" \
+  --queue-url "${ENDPOINT_URL}/000000000000/${QUEUE_NAME}" \
   --message-body "$(cat <<EOF
 {
   "videoKey": "start-process/abc123-def456-789.mp4",

@@ -6,10 +6,15 @@ Este diretório contém scripts para testes locais do ms-video usando LocalStack
 
 - Docker e Docker Compose rodando
 - LocalStack configurado (docker-compose up)
-- AWS CLI com awslocal instalado
+- AWS CLI instalado
 
 ```bash
-pip install awscli-local
+# Instalar AWS CLI (se ainda não tiver)
+# Windows (via chocolatey)
+choco install awscli
+
+# Linux/Mac
+pip install awscli
 ```
 
 ## Scripts Disponíveis
@@ -99,18 +104,33 @@ awslocal sqs receive-message \
 
 ## Troubleshooting
 
-### Erro: awslocal: command not found
+### Erro: aws: command not found
+Instale o AWS CLI:
 ```bash
-pip install awscli-local
+pip install awscli
 ```
 
 ### Erro: Queue does not exist
 Verifique se o LocalStack está rodando e as filas foram criadas:
 ```bash
-awslocal sqs list-queues
+aws --endpoint-url=http://localhost:4566 sqs list-queues
+```
+
+### Erro: Could not connect to the endpoint URL
+Certifique-se que o LocalStack está rodando:
+```bash
+docker ps | grep localstack
+```
+
+Se não estiver rodando:
+```bash
+docker-compose up -d
 ```
 
 ### Permissões no script
 ```bash
 chmod +x *.sh
 ```
+
+### Windows: bash not found
+Use Git Bash ou WSL para executar os scripts bash no Windows.
