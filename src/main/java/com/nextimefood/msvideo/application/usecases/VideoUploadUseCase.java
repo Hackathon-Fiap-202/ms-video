@@ -40,8 +40,8 @@ public class VideoUploadUseCase {
         this.mapper = mapper;
     }
 
-    public String upload(MultipartFile file) {
-        LOGGER.info("Starting video upload process for file: {}", file != null ? file.getOriginalFilename() : "null");
+    public String upload(MultipartFile file, String userId) {
+        LOGGER.info("Starting video upload process for file: {} from user: {}", file != null ? file.getOriginalFilename() : "null", userId);
         
         validateFile(file);
         
@@ -49,7 +49,7 @@ public class VideoUploadUseCase {
             final var key = generateUniqueKey(file.getOriginalFilename());
             LOGGER.debug("Generated unique key for video: {}", key);
             
-            final var doc = saveReceived(file, key);
+            final var doc = saveReceived(file, key, userId);
             uploadFile(file, key);
             publishMessage(key);
             updateStatus(doc, ProcessStatus.PROCESSING);
@@ -77,12 +77,13 @@ public class VideoUploadUseCase {
         }
     }
 
-    private VideoDocument saveReceived(MultipartFile file, String key) {
-        LOGGER.debug("Saving video document with status RECEIVED for key: {}", key);
+    private VideoDocument saveReceived(MultipartFile file, String key, String userId) {
+        LOGGER.debug("Saving video document with status RECEIVED for key: {} for user: {}", key, userId);
         final var request = new VideoUploadRequest(file.getOriginalFilename(), file.getContentType(), file.getSize());
         final var doc = mapper.toDocument(request);
         doc.setBucket(bucketName);
         doc.setKey(key);
+        doc.setCognitoUserId(userId);
         doc.setStatus(ProcessStatus.RECEIVED);
         return repository.save(doc);
     }

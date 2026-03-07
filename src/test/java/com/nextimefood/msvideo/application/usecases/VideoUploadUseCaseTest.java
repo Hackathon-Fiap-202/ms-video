@@ -78,7 +78,7 @@ class VideoUploadUseCaseTest {
         when(mapper.toDocument(any())).thenReturn(videoDocument);
         when(repository.save(any(VideoDocument.class))).thenReturn(videoDocument);
 
-        String key = videoUploadUseCase.upload(file);
+        String key = videoUploadUseCase.upload(file, "test-user");
 
         assertNotNull(key);
         assertTrue(key.startsWith("start-process/"));
@@ -96,7 +96,7 @@ class VideoUploadUseCaseTest {
 
         InvalidFileException exception = assertThrows(
                 InvalidFileException.class,
-                () -> videoUploadUseCase.upload(file)
+                () -> videoUploadUseCase.upload(file, "test-user")
         );
 
         assertTrue(exception.getMessage().contains("Arquivo vazio"));
@@ -111,7 +111,7 @@ class VideoUploadUseCaseTest {
     void shouldThrowInvalidFileExceptionWhenFileIsNull() {
         InvalidFileException exception = assertThrows(
                 InvalidFileException.class,
-                () -> videoUploadUseCase.upload(null)
+                () -> videoUploadUseCase.upload(null, "test-user")
         );
 
         assertTrue(exception.getMessage().contains("Arquivo vazio"));
@@ -128,7 +128,7 @@ class VideoUploadUseCaseTest {
 
         InvalidFileException exception = assertThrows(
                 InvalidFileException.class,
-                () -> videoUploadUseCase.upload(file)
+                () -> videoUploadUseCase.upload(file, "test-user")
         );
 
         assertTrue(exception.getMessage().contains("Nome do arquivo inválido"));
@@ -146,7 +146,7 @@ class VideoUploadUseCaseTest {
 
         InvalidFileException exception = assertThrows(
                 InvalidFileException.class,
-                () -> videoUploadUseCase.upload(file)
+                () -> videoUploadUseCase.upload(file, "test-user")
         );
 
         assertTrue(exception.getMessage().contains("Nome do arquivo inválido"));
@@ -170,7 +170,7 @@ class VideoUploadUseCaseTest {
 
         VideoUploadException exception = assertThrows(
                 VideoUploadException.class,
-                () -> videoUploadUseCase.upload(file)
+                () -> videoUploadUseCase.upload(file, "test-user")
         );
 
         assertTrue(exception.getMessage().contains("Erro ao fazer upload do vídeo"));
@@ -191,7 +191,7 @@ class VideoUploadUseCaseTest {
         when(mapper.toDocument(any())).thenReturn(videoDocument);
         when(repository.save(any(VideoDocument.class))).thenReturn(videoDocument);
 
-        String key = videoUploadUseCase.upload(file);
+        String key = videoUploadUseCase.upload(file, "test-user");
 
         assertTrue(key.matches("start-process/[a-f0-9-]+\\.mp4"));
     }
@@ -207,7 +207,7 @@ class VideoUploadUseCaseTest {
         when(mapper.toDocument(any())).thenReturn(videoDocument);
         when(repository.save(any(VideoDocument.class))).thenReturn(videoDocument);
 
-        videoUploadUseCase.upload(file);
+        videoUploadUseCase.upload(file, "test-user");
 
         verify(repository, times(2)).save(argThat(doc ->
                 doc.getStatus() == ProcessStatus.PROCESSING || doc.getStatus() == ProcessStatus.RECEIVED

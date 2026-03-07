@@ -57,9 +57,15 @@ public class VideoStatusUpdateUseCase {
         video.setArchiveSize(event.getArchiveSize());
         repository.save(video);
         
-        publisher.publish(videoProcessedEventQueue, event);
+        final var lambdaEvent = com.nextimefood.msvideo.application.dto.ProcessedVideoEvent.builder()
+                .cognito_user_id(video.getCognitoUserId())
+                .key_name(event.getVideoKey())
+                .status(event.getStatus().name())
+                .build();
+
+        publisher.publish(videoProcessedEventQueue, lambdaEvent);
         
-        LOGGER.info("Video updated and event published for successful processing");
+        LOGGER.info("Video updated and event published for successful processing to queue: {}", videoProcessedEventQueue);
     }
 
     private void handleFailedProcessing(VideoStatusEventDTO event, VideoDocument video) {
