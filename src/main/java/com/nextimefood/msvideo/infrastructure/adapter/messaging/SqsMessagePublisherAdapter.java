@@ -31,7 +31,7 @@ public class SqsMessagePublisherAdapter implements MessagePublisherPort {
 
         try {
             final var body = toJson(payload);
-            LOGGER.debug("Serialized message body: {}", body);
+            LOGGER.info("Serialized message body: {}", body);
 
             sqsTemplate.send(to -> to
                     .queue(queueName)

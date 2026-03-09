@@ -21,6 +21,7 @@ public class VideoDocument {
     private String originalFilename;
     private String contentType;
     private long size;
+    private String cognitoUserId;
     private ProcessStatus status = ProcessStatus.RECEIVED;
 
     @CreatedDate

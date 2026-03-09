@@ -16,6 +16,7 @@ public interface VideoRequestMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "frameCount", ignore = true)
     @Mapping(target = "archiveSize", ignore = true)
+    @Mapping(target = "cognitoUserId", ignore = true)
     VideoDocument toDocument(VideoUploadRequest request);
 
 }

@@ -25,5 +25,6 @@ spring:
     s3:
       endpoint: ${SPRING_CLOUD_S3_ENDPOINT:http://localhost:4566}
       bucket-name: ${SPRING_CLOUD_S3_BUCKET_NAME:msvideo-bucket}
+      input-prefix: ${SPRING_CLOUD_S3_INPUT_PREFIX:video-input-storage/}
       access-key: ${AWS_ACCESS_KEY_ID:test}
       secret-key: ${AWS_SECRET_ACCESS_KEY:test}
