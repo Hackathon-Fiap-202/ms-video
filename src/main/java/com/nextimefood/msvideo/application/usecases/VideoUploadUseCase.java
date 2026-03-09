@@ -30,6 +30,8 @@ public class VideoUploadUseCase {
 
     @Value("${spring.cloud.s3.bucket-name}")
     private String bucketName;
+    @Value("${spring.cloud.s3.input-prefix:video-input-storage/}")
+    private String inputPrefix;
     @Value("${spring.cloud.sqs.queues.video-process-command}")
     private String videoProcessCommandQueue;
 
@@ -112,6 +114,6 @@ public class VideoUploadUseCase {
         if (originalFilename != null && originalFilename.contains(".")) {
             extension = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
-        return "start-process/%s%s".formatted(UUID.randomUUID(), extension);
+        return inputPrefix + "start-process/%s%s".formatted(UUID.randomUUID(), extension);
     }
 }
