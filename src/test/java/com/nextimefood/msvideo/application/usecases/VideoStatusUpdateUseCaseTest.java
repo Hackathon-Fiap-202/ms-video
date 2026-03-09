@@ -1,6 +1,7 @@
 package com.nextimefood.msvideo.application.usecases;
 
 import com.nextimefood.msvideo.application.dto.VideoStatusEventDTO;
+import com.nextimefood.msvideo.application.dto.ProcessedVideoEvent;
 import com.nextimefood.msvideo.application.ports.outgoing.MessagePublisherPort;
 import com.nextimefood.msvideo.application.ports.outgoing.VideoRepositoryPort;
 import com.nextimefood.msvideo.domain.ProcessStatus;
@@ -18,6 +19,8 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,7 +80,12 @@ class VideoStatusUpdateUseCaseTest {
                 video.getFrameCount() == 100 &&
                 video.getArchiveSize() == 5000L
         ));
-        verify(publisher, times(1)).publish(TEST_QUEUE, successEvent);
+        verify(publisher, times(1)).publish(
+                eq(TEST_QUEUE),
+                argThat(arg -> arg instanceof ProcessedVideoEvent evt
+                        && TEST_VIDEO_KEY.equals(evt.getKey_name())
+                        && "PROCESSED".equals(evt.getStatus()))
+        );
     }
 
     @Test

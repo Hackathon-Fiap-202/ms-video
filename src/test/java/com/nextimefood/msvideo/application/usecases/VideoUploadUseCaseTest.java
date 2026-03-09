@@ -56,6 +56,7 @@ class VideoUploadUseCaseTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(videoUploadUseCase, "bucketName", TEST_BUCKET);
+        ReflectionTestUtils.setField(videoUploadUseCase, "inputPrefix", "video-input-storage/");
         ReflectionTestUtils.setField(videoUploadUseCase, "videoProcessCommandQueue", TEST_QUEUE);
 
         videoDocument = new VideoDocument();
@@ -81,7 +82,7 @@ class VideoUploadUseCaseTest {
         String key = videoUploadUseCase.upload(file, "test-user");
 
         assertNotNull(key);
-        assertTrue(key.startsWith("start-process/"));
+        assertTrue(key.startsWith("video-input-storage/start-process/"));
         assertTrue(key.endsWith(".mp4"));
 
         verify(repository, times(2)).save(any(VideoDocument.class));
@@ -193,7 +194,7 @@ class VideoUploadUseCaseTest {
 
         String key = videoUploadUseCase.upload(file, "test-user");
 
-        assertTrue(key.matches("start-process/[a-f0-9-]+\\.mp4"));
+        assertTrue(key.matches("video-input-storage/start-process/[a-f0-9-]+\\.mp4"));
     }
 
     @Test
