@@ -30,7 +30,7 @@
 		<java.version>17</java.version>
 		<spring-cloud-aws-starter-s3.version>4.0.0</spring-cloud-aws-starter-s3.version>
 		<spring-cloud-aws-starter-sqs.version>4.0.0</spring-cloud-aws-starter-sqs.version>
-		<jacoco.version>0.8.11</jacoco.version>
+		<jacoco.version>0.8.14</jacoco.version>
 	</properties>
 	<dependencies>
 		<dependency>
