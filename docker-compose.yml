@@ -1,0 +1,39 @@
+services:
+
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: sqs,s3
+      DEBUG: "1"
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_SESSION_TOKEN: test
+    networks:
+      - msvideo-network
+    volumes:
+      - "./localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./local/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: always
+    networks:
+      - msvideo-network
+    environment:
+      - MONGO_INITDB_DATABASE=msvideo
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./local/init.js:/docker-entrypoint-initdb.d/init.js:ro
+
+networks:
+  msvideo-network:
+    driver: bridge
