@@ -1,5 +1,6 @@
 package com.nextimefood.msvideo.application.usecases;
 
+import com.nextimefood.msvideo.application.dto.ProcessedVideoEvent;
 import com.nextimefood.msvideo.application.dto.VideoStatusEventDTO;
 import com.nextimefood.msvideo.application.ports.outgoing.MessagePublisherPort;
 import com.nextimefood.msvideo.application.ports.outgoing.VideoRepositoryPort;
@@ -37,15 +38,10 @@ public class VideoStatusUpdateUseCase {
         
         final var video = videoOpt.get();
         
-        try {
-            if (event.isSuccess()) {
-                handleSuccessfulProcessing(event, video);
-            } else {
-                handleFailedProcessing(event, video);
-            }
-        } catch (Exception e) {
-            LOGGER.error("Error updating video status for key: {}", event.getVideoKey(), e);
-            throw e;
+        if (event.isSuccess()) {
+            handleSuccessfulProcessing(event, video);
+        } else {
+            handleFailedProcessing(event, video);
         }
     }
 
@@ -57,9 +53,9 @@ public class VideoStatusUpdateUseCase {
         video.setArchiveSize(event.getArchiveSize());
         repository.save(video);
         
-        final var lambdaEvent = com.nextimefood.msvideo.application.dto.ProcessedVideoEvent.builder()
-                .cognito_user_id(video.getCognitoUserId())
-                .key_name(event.getVideoKey())
+        final var lambdaEvent = ProcessedVideoEvent.builder()
+                .cognitoUserId(video.getCognitoUserId())
+                .keyName(event.getVideoKey())
                 .status(event.getStatus().name())
                 .build();
 

@@ -97,6 +97,6 @@ class VideoDownloadUseCaseTest {
 
         videoDownloadUseCase.generateDownloadUrl(TEST_KEY);
 
-        verify(storage).generatePresignedUrl(eq(TEST_BUCKET), eq(TEST_KEY), eq(Duration.ofHours(1)));
+        verify(storage).generatePresignedUrl(TEST_BUCKET, TEST_KEY, Duration.ofHours(1));
     }
 }
