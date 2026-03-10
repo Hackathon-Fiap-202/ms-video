@@ -47,29 +47,38 @@ public class VideoStatusUpdateUseCase {
 
     private void handleSuccessfulProcessing(VideoStatusEventDTO event, VideoDocument video) {
         LOGGER.info("Video processing succeeded for key: {}", event.getVideoKey());
-        
+
         video.setStatus(event.getStatus());
         video.setFrameCount(event.getFrameCount());
         video.setArchiveSize(event.getArchiveSize());
+        video.setProcessedKey(deriveZipFilename(event.getVideoKey()));
         repository.save(video);
-        
+
         final var lambdaEvent = ProcessedVideoEvent.builder()
                 .cognitoUserId(video.getCognitoUserId())
-                .keyName(event.getVideoKey())
+                .keyName(video.getProcessedKey())
                 .status(event.getStatus().name())
                 .build();
 
         publisher.publish(videoProcessedEventQueue, lambdaEvent);
-        
+
         LOGGER.info("Video updated and event published for successful processing to queue: {}", videoProcessedEventQueue);
     }
 
     private void handleFailedProcessing(VideoStatusEventDTO event, VideoDocument video) {
         LOGGER.warn("Video processing failed for key: {}", event.getVideoKey());
-        
+
         video.setStatus(event.getStatus());
         repository.save(video);
-        
+
         LOGGER.info("Video status updated to {} for failed processing", event.getStatus());
+    }
+
+    private String deriveZipFilename(String inputKey) {
+        final String filename = inputKey.substring(inputKey.lastIndexOf('/') + 1);
+        final String nameWithoutExtension = filename.contains(".")
+                ? filename.substring(0, filename.lastIndexOf('.'))
+                : filename;
+        return nameWithoutExtension + ".zip";
     }
 }
