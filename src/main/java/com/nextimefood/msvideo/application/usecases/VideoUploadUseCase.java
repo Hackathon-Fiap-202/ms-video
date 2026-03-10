@@ -59,10 +59,8 @@ public class VideoUploadUseCase {
             LOGGER.info("Video upload completed successfully with key: {}", key);
             return key;
         } catch (IOException e) {
-            LOGGER.error("Failed to upload video file: {}", file.getOriginalFilename(), e);
             throw new VideoUploadException("Erro ao fazer upload do vídeo", e);
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error during video upload: {}", file.getOriginalFilename(), e);
+        } catch (RuntimeException e) {
             throw new VideoUploadException("Erro inesperado ao processar upload do vídeo", e);
         }
     }
@@ -72,8 +70,9 @@ public class VideoUploadUseCase {
             LOGGER.warn("Attempted to upload empty file");
             throw new InvalidFileException("Arquivo vazio");
         }
-        
-        if (file.getOriginalFilename() == null || file.getOriginalFilename().isBlank()) {
+
+        final var filename = file.getOriginalFilename();
+        if (filename == null || filename.isBlank()) {
             LOGGER.warn("Attempted to upload file without name");
             throw new InvalidFileException("Nome do arquivo inválido");
         }

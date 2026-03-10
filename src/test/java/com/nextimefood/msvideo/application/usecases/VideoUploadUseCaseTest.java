@@ -214,4 +214,41 @@ class VideoUploadUseCaseTest {
                 doc.getStatus() == ProcessStatus.PROCESSING || doc.getStatus() == ProcessStatus.RECEIVED
         ));
     }
+
+    @Test
+    @DisplayName("Should generate key without extension when filename has no dot")
+    void shouldGenerateKeyWithoutExtensionWhenFilenameHasNoDot() throws IOException {
+        when(file.isEmpty()).thenReturn(false);
+        when(file.getOriginalFilename()).thenReturn("videofile");
+        when(file.getContentType()).thenReturn("video/mp4");
+        when(file.getSize()).thenReturn(1024L);
+        when(file.getInputStream()).thenReturn(mock(InputStream.class));
+        when(mapper.toDocument(any())).thenReturn(videoDocument);
+        when(repository.save(any(VideoDocument.class))).thenReturn(videoDocument);
+
+        final String key = videoUploadUseCase.upload(file, "test-user");
+
+        assertNotNull(key);
+        assertTrue(key.startsWith("video-input-storage/start-process/"));
+        assertFalse(key.contains("."));
+    }
+
+    @Test
+    @DisplayName("Should throw VideoUploadException when an unexpected runtime error occurs")
+    void shouldThrowVideoUploadExceptionWhenRuntimeErrorOccurs() {
+        when(file.isEmpty()).thenReturn(false);
+        when(file.getOriginalFilename()).thenReturn("test-video.mp4");
+        when(file.getContentType()).thenReturn("video/mp4");
+        when(file.getSize()).thenReturn(1024L);
+        when(mapper.toDocument(any())).thenReturn(videoDocument);
+        when(repository.save(any(VideoDocument.class))).thenThrow(new RuntimeException("DB error"));
+
+        VideoUploadException exception = assertThrows(
+                VideoUploadException.class,
+                () -> videoUploadUseCase.upload(file, "test-user")
+        );
+
+        assertTrue(exception.getMessage().contains("Erro inesperado ao processar upload do vídeo"));
+        verify(publisher, never()).publish(anyString(), any());
+    }
 }

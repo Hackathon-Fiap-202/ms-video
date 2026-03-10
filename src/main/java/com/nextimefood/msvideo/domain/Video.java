@@ -23,6 +23,7 @@ public class Video {
     public Video() {
     }
 
+    @SuppressWarnings("java:S107") // Domain entity with all fields; splitting would add unnecessary complexity
     public Video(String id, String bucket, String key, String originalFilename, String contentType,
                  long size, ProcessStatus status, Instant createdAt, Instant updatedAt,
                  int frameCount, long archiveSize) {
