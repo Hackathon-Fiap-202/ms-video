@@ -40,10 +40,8 @@ public class SqsMessagePublisherAdapter implements MessagePublisherPort {
 
             LOGGER.info("Message published successfully to queue: {}", queueName);
         } catch (MessagePublishException e) {
-            LOGGER.error("Failed to publish message to queue: {}", queueName, e);
             throw e;
         } catch (Exception e) {
-            LOGGER.error("Unexpected error while publishing message to queue: {}", queueName, e);
             throw new MessagePublishException("Erro inesperado ao publicar mensagem na fila " + queueName, e);
         }
     }
@@ -52,7 +50,6 @@ public class SqsMessagePublisherAdapter implements MessagePublisherPort {
         try {
             return objectMapper.writeValueAsString(payload);
         } catch (JsonProcessingException e) {
-            LOGGER.error("Failed to serialize payload to JSON: {}", payload.getClass().getSimpleName(), e);
             throw new MessagePublishException("Erro ao serializar payload para JSON", e);
         }
     }

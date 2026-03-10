@@ -38,13 +38,10 @@ public class VideoUpdatedEventListener {
             LOGGER.info("Successfully processed video updated event for videoKey: {}", event.getVideoKey());
 
         } catch (JsonProcessingException e) {
-            LOGGER.error("Failed to deserialize message from video-updated-event queue. Invalid JSON format: {}", message, e);
             throw new MessageProcessingException("Erro ao deserializar mensagem do evento de vídeo atualizado", e);
         } catch (MessageProcessingException e) {
-            LOGGER.error("Message processing exception occurred: {}", e.getMessage(), e);
             throw e;
         } catch (Exception e) {
-            LOGGER.error("Unexpected error processing video updated event message: {}", message, e);
             throw new MessageProcessingException("Erro inesperado ao processar evento de vídeo atualizado", e);
         }
     }

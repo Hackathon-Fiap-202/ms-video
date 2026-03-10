@@ -33,6 +33,7 @@ public class VideoDocument {
     private long archiveSize;
 
     public VideoDocument() {
+        // Required by Spring Data MongoDB for deserialization
     }
 
 }

@@ -1,5 +1,6 @@
 package com.nextimefood.msvideo.application.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +11,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProcessedVideoEvent {
-    private String cognito_user_id;
-    private String key_name;
+    @JsonProperty("cognito_user_id")
+    private String cognitoUserId;
+    @JsonProperty("key_name")
+    private String keyName;
     private String status;
 }

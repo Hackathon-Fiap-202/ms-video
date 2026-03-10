@@ -1,5 +1,6 @@
 server:
   port: ${SERVER_PORT:8090}
+  forward-headers-strategy: framework
 
 spring:
   application:
@@ -25,3 +26,20 @@ spring:
     s3:
       bucket-name: ${SPRING_CLOUD_S3_BUCKET_NAME:msvideo-bucket}
       input-prefix: ${SPRING_CLOUD_S3_INPUT_PREFIX:video-input-storage/}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local,test
+  cloud:
+    sqs:
+      endpoint: ${SPRING_CLOUD_SQS_ENDPOINT:http://localhost:4566}
+    s3:
+      endpoint: ${SPRING_CLOUD_S3_ENDPOINT:http://localhost:4566}
