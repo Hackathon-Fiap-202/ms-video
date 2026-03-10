@@ -10,4 +10,6 @@ public interface VideoStoragePort {
 
     String generatePresignedUrl(String bucket, String key, Duration duration);
 
+    String generatePresignedPutUrl(String bucket, String key, Duration duration);
+
 }

@@ -1,7 +1,11 @@
 package com.nextimefood.msvideo.infrastructure.controller;
 
 import com.nextimefood.msvideo.application.dto.VideoDownloadResponse;
+import com.nextimefood.msvideo.application.dto.VideoUploadPresignRequest;
+import com.nextimefood.msvideo.application.dto.VideoUploadPresignResponse;
+import com.nextimefood.msvideo.application.usecases.VideoConfirmUploadUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoDownloadUseCase;
+import com.nextimefood.msvideo.application.usecases.VideoUploadPresignUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoUploadUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,10 +30,18 @@ public class VideoController {
 
     private final VideoUploadUseCase videoUploadUseCase;
     private final VideoDownloadUseCase videoDownloadUseCase;
+    private final VideoUploadPresignUseCase videoUploadPresignUseCase;
+    private final VideoConfirmUploadUseCase videoConfirmUploadUseCase;
 
-    public VideoController(VideoUploadUseCase videoUploadUseCase, VideoDownloadUseCase videoDownloadUseCase) {
+    public VideoController(
+            VideoUploadUseCase videoUploadUseCase,
+            VideoDownloadUseCase videoDownloadUseCase,
+            VideoUploadPresignUseCase videoUploadPresignUseCase,
+            VideoConfirmUploadUseCase videoConfirmUploadUseCase) {
         this.videoUploadUseCase = videoUploadUseCase;
         this.videoDownloadUseCase = videoDownloadUseCase;
+        this.videoUploadPresignUseCase = videoUploadPresignUseCase;
+        this.videoConfirmUploadUseCase = videoConfirmUploadUseCase;
     }
 
     @PostMapping("/upload")
@@ -38,6 +51,22 @@ public class VideoController {
             @RequestHeader("X-Cognito-User-Id") String userId) {
         LOGGER.info("Received upload request for file: {} from user: {}", file.getOriginalFilename(), userId);
         return videoUploadUseCase.upload(file, userId);
+    }
+
+    @PostMapping("/upload/presign")
+    public ResponseEntity<VideoUploadPresignResponse> presignUpload(
+            @RequestBody VideoUploadPresignRequest request,
+            @RequestHeader("X-Cognito-User-Id") String userId) {
+        LOGGER.info("Received presign upload request for file: {} from user: {}", request.getFilename(), userId);
+        final var response = videoUploadPresignUseCase.presign(request, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/confirm/{key}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void confirmUpload(@PathVariable String key) {
+        LOGGER.info("Received upload confirmation for key: {}", key);
+        videoConfirmUploadUseCase.confirm(key);
     }
 
     @GetMapping("/download/{key}")

@@ -1,7 +1,11 @@
 package com.nextimefood.msvideo.infrastructure.controller;
 
 import com.nextimefood.msvideo.application.dto.VideoDownloadResponse;
+import com.nextimefood.msvideo.application.dto.VideoUploadPresignRequest;
+import com.nextimefood.msvideo.application.dto.VideoUploadPresignResponse;
+import com.nextimefood.msvideo.application.usecases.VideoConfirmUploadUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoDownloadUseCase;
+import com.nextimefood.msvideo.application.usecases.VideoUploadPresignUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoUploadUseCase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,6 +33,12 @@ class VideoControllerTest {
     private VideoDownloadUseCase videoDownloadUseCase;
 
     @Mock
+    private VideoUploadPresignUseCase videoUploadPresignUseCase;
+
+    @Mock
+    private VideoConfirmUploadUseCase videoConfirmUploadUseCase;
+
+    @Mock
     private MultipartFile file;
 
     @InjectMocks
@@ -53,6 +63,48 @@ class VideoControllerTest {
             // Assert
             assertEquals(expectedKey, result);
             verify(videoUploadUseCase).upload(file, userId);
+        }
+    }
+
+    @Nested
+    @DisplayName("presignUpload()")
+    class PresignUploadTests {
+
+        @Test
+        @DisplayName("Should return 200 with presign response")
+        void shouldReturn200WithPresignResponse() {
+            // Arrange
+            final String userId = "user-456";
+            final var request = new VideoUploadPresignRequest("video.mp4", "video/mp4");
+            final var presignResponse = new VideoUploadPresignResponse("some-key", "https://s3.example.com/put-url", "15 minutes");
+            when(videoUploadPresignUseCase.presign(request, userId)).thenReturn(presignResponse);
+
+            // Act
+            final ResponseEntity<VideoUploadPresignResponse> result = controller.presignUpload(request, userId);
+
+            // Assert
+            assertNotNull(result);
+            assertEquals(200, result.getStatusCode().value());
+            assertEquals(presignResponse, result.getBody());
+            verify(videoUploadPresignUseCase).presign(request, userId);
+        }
+    }
+
+    @Nested
+    @DisplayName("confirmUpload()")
+    class ConfirmUploadTests {
+
+        @Test
+        @DisplayName("Should delegate confirmation to use case")
+        void shouldDelegateConfirmationToUseCase() {
+            // Arrange
+            final String key = "video-input-storage/start-process/abc.mp4";
+
+            // Act
+            controller.confirmUpload(key);
+
+            // Assert
+            verify(videoConfirmUploadUseCase).confirm(key);
         }
     }
 
