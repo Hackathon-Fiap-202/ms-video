@@ -13,6 +13,8 @@ RUN mvn clean package -DskipTests -q
 # ---------- Runtime ----------
 FROM amazoncorretto:17-alpine
 
+RUN apk add --no-cache curl
+
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
