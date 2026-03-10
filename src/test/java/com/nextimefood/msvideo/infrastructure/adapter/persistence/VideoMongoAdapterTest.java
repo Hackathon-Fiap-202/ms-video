@@ -83,4 +83,38 @@ class VideoMongoAdapterTest {
             assertTrue(result.isEmpty());
         }
     }
+
+    @Nested
+    @DisplayName("findByProcessedKey()")
+    class FindByProcessedKeyTests {
+
+        @Test
+        @DisplayName("Should return present optional when document found by processedKey")
+        void shouldReturnPresentOptionalWhenFoundByProcessedKey() {
+            // Arrange
+            final var doc = new VideoDocument();
+            doc.setProcessedKey("abc123.zip");
+            when(repository.findByProcessedKey("abc123.zip")).thenReturn(Optional.of(doc));
+
+            // Act
+            final Optional<VideoDocument> result = adapter.findByProcessedKey("abc123.zip");
+
+            // Assert
+            assertTrue(result.isPresent());
+            assertEquals("abc123.zip", result.get().getProcessedKey());
+        }
+
+        @Test
+        @DisplayName("Should return empty optional when document not found by processedKey")
+        void shouldReturnEmptyOptionalWhenNotFoundByProcessedKey() {
+            // Arrange
+            when(repository.findByProcessedKey("missing.zip")).thenReturn(Optional.empty());
+
+            // Act
+            final Optional<VideoDocument> result = adapter.findByProcessedKey("missing.zip");
+
+            // Assert
+            assertTrue(result.isEmpty());
+        }
+    }
 }

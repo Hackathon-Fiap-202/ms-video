@@ -31,6 +31,7 @@ public class VideoDocument {
 
     private int frameCount;
     private long archiveSize;
+    private String processedKey;
 
     public VideoDocument() {
         // Required by Spring Data MongoDB for deserialization

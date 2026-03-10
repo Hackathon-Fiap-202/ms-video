@@ -42,6 +42,7 @@ class VideoDocumentTest {
         doc.setUpdatedAt(now);
         doc.setFrameCount(60);
         doc.setArchiveSize(512L);
+        doc.setProcessedKey("abc123.zip");
 
         // Assert
         assertEquals("id-1", doc.getId());
@@ -56,6 +57,7 @@ class VideoDocumentTest {
         assertEquals(now, doc.getUpdatedAt());
         assertEquals(60, doc.getFrameCount());
         assertEquals(512L, doc.getArchiveSize());
+        assertEquals("abc123.zip", doc.getProcessedKey());
     }
 
     @Test
@@ -73,5 +75,6 @@ class VideoDocumentTest {
         assertNull(doc.getCognitoUserId());
         assertNull(doc.getCreatedAt());
         assertNull(doc.getUpdatedAt());
+        assertNull(doc.getProcessedKey());
     }
 }

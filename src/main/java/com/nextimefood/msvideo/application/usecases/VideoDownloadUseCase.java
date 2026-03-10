@@ -7,42 +7,49 @@ import com.nextimefood.msvideo.domain.exception.VideoNotFoundException;
 import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class VideoDownloadUseCase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VideoDownloadUseCase.class);
+    private static final String OUTPUT_SUBPREFIX = "end-process/";
+    private static final Duration DOWNLOAD_DURATION = Duration.ofHours(1);
+    private static final String EXPIRES_IN_LABEL = "1 hour";
 
     private final VideoRepositoryPort repository;
     private final VideoStoragePort storage;
+
+    @Value("${spring.cloud.s3.output-prefix}")
+    private String outputPrefix;
 
     public VideoDownloadUseCase(VideoRepositoryPort repository, VideoStoragePort storage) {
         this.repository = repository;
         this.storage = storage;
     }
 
-    public VideoDownloadResponse generateDownloadUrl(String key) {
-        LOGGER.info("Generating download URL for video key: {}", key);
-        
-        final var videoOpt = repository.findByKey(key);
-        
+    public VideoDownloadResponse generateDownloadUrl(String processedKey) {
+        LOGGER.info("Generating download URL for processed key: {}", processedKey);
+
+        final var videoOpt = repository.findByProcessedKey(processedKey);
+
         if (videoOpt.isEmpty()) {
-            LOGGER.warn("Video not found with key: {}", key);
-            throw new VideoNotFoundException(key);
+            LOGGER.warn("Video not found with processed key: {}", processedKey);
+            throw new VideoNotFoundException(processedKey);
         }
 
         final var video = videoOpt.get();
-        final var duration = Duration.ofHours(1);
-        final var presignedUrl = storage.generatePresignedUrl(video.getBucket(), video.getKey(), duration);
+        final var fullS3Key = outputPrefix + OUTPUT_SUBPREFIX + video.getProcessedKey();
+        final var presignedUrl = storage.generatePresignedUrl(video.getBucket(), fullS3Key, DOWNLOAD_DURATION);
 
-        LOGGER.info("Successfully generated download URL for video key: {}", key);
-        
+        LOGGER.info("Successfully generated download URL for processed key: {}", processedKey);
+
         return new VideoDownloadResponse(
             video.getId(),
-            video.getKey(),
+            video.getProcessedKey(),
             presignedUrl,
-            "1 hour"
+            EXPIRES_IN_LABEL
         );
     }
 }

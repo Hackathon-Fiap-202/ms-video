@@ -8,4 +8,6 @@ public interface VideoRepositoryPort {
 
     java.util.Optional<VideoDocument> findByKey(String key);
 
+    java.util.Optional<VideoDocument> findByProcessedKey(String processedKey);
+
 }
