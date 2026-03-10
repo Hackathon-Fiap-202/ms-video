@@ -83,7 +83,7 @@ class VideoStatusUpdateUseCaseTest {
         verify(publisher, times(1)).publish(
                 eq(TEST_QUEUE),
                 argThat(arg -> arg instanceof ProcessedVideoEvent evt
-                        && TEST_VIDEO_KEY.equals(evt.getKey_name())
+                        && TEST_VIDEO_KEY.equals(evt.getKeyName())
                         && "PROCESSED".equals(evt.getStatus()))
         );
     }
