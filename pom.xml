@@ -160,14 +160,10 @@
 				</executions>
 				<configuration>
 					<excludes>
-						<exclude>**/infrastructure/**/*</exclude>
-						<exclude>**/domain/exception/*</exclude>
-						<exclude>**/domain/Video.class</exclude>
-						<exclude>**/domain/ProcessStatus.class</exclude>
-						<exclude>**/application/dto/*</exclude>
 						<exclude>**/application/mapper/*</exclude>
 						<exclude>**/application/ports/**/*</exclude>
 						<exclude>**/configuration/*</exclude>
+						<exclude>**/infrastructure/persistence/VideoMongoRepository.class</exclude>
 						<exclude>**/MsVideoApplication.class</exclude>
 					</excludes>
 				</configuration>
