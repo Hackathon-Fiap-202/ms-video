@@ -56,7 +56,7 @@ public class VideoStatusUpdateUseCase {
 
         final var lambdaEvent = ProcessedVideoEvent.builder()
                 .cognitoUserId(video.getCognitoUserId())
-                .keyName(event.getVideoKey())
+                .keyName(video.getProcessedKey())
                 .status(event.getStatus().name())
                 .build();
 

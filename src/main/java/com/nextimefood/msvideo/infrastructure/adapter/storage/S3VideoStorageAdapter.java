@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Component
 @Primary
@@ -35,13 +34,9 @@ public class S3VideoStorageAdapter implements VideoStoragePort {
 
     @Override
     public String generatePresignedPutUrl(String bucket, String key, Duration duration) {
-        final var putRequest = PutObjectRequest.builder()
-                .bucket(bucket)
-                .key(key)
-                .build();
         final var presignRequest = PutObjectPresignRequest.builder()
                 .signatureDuration(duration)
-                .putObjectRequest(putRequest)
+                .putObjectRequest(req -> req.bucket(bucket).key(key))
                 .build();
         return s3Presigner.presignPutObject(presignRequest).url().toString();
     }
