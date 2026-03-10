@@ -1,4 +1,4 @@
-FROM amazoncorretto:17-alpine AS build
+FROM amazoncorretto:25-alpine AS build
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN mvn clean package -DskipTests -q
 RUN curl -Lo /app/dd-java-agent.jar https://dtdg.co/latest-java-tracer
 
 # ---------- Runtime ----------
-FROM amazoncorretto:17-alpine
+FROM amazoncorretto:25-alpine
 
 RUN apk add --no-cache curl
 
