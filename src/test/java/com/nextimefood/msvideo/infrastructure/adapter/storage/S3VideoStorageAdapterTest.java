@@ -8,6 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -18,6 +21,7 @@ import java.net.URL;
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +31,9 @@ class S3VideoStorageAdapterTest {
 
     @Mock
     private S3Template s3Template;
+
+    @Mock
+    private S3Presigner s3Presigner;
 
     @InjectMocks
     private S3VideoStorageAdapter adapter;
@@ -56,7 +63,7 @@ class S3VideoStorageAdapterTest {
     class GeneratePresignedUrlTests {
 
         @Test
-        @DisplayName("Should return presigned URL string from S3Template")
+        @DisplayName("Should return presigned GET URL string from S3Template")
         void shouldReturnPresignedUrlString() throws MalformedURLException {
             // Arrange
             final String bucket = "test-bucket";
@@ -70,6 +77,32 @@ class S3VideoStorageAdapterTest {
 
             // Assert
             assertEquals(fakeUrl.toString(), result);
+        }
+    }
+
+    @Nested
+    @DisplayName("generatePresignedPutUrl()")
+    class GeneratePresignedPutUrlTests {
+
+        @Test
+        @DisplayName("Should return presigned PUT URL string from S3Presigner")
+        void shouldReturnPresignedPutUrlString() throws MalformedURLException {
+            // Arrange
+            final String bucket = "test-bucket";
+            final String key = "test-key.mp4";
+            final Duration duration = Duration.ofMinutes(15);
+            final URL fakeUrl = URI.create("https://s3.amazonaws.com/test-bucket/test-key.mp4?X-Amz-Signature=abc").toURL();
+
+            final PresignedPutObjectRequest presignedRequest = org.mockito.Mockito.mock(PresignedPutObjectRequest.class);
+            when(presignedRequest.url()).thenReturn(fakeUrl);
+            when(s3Presigner.presignPutObject(any(PutObjectPresignRequest.class))).thenReturn(presignedRequest);
+
+            // Act
+            final String result = adapter.generatePresignedPutUrl(bucket, key, duration);
+
+            // Assert
+            assertEquals(fakeUrl.toString(), result);
+            verify(s3Presigner).presignPutObject(any(PutObjectPresignRequest.class));
         }
     }
 }
