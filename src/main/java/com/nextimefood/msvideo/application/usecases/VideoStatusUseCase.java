@@ -19,21 +19,21 @@ public class VideoStatusUseCase {
     }
 
     public VideoStatusResponse getStatus(String key) {
-        LOGGER.info("Fetching status for video key: {}", key);
+        LOGGER.info("Fetching status for video");
 
         final String searchSuffix = (key != null && key.contains("/")) ? key.substring(key.lastIndexOf("/") + 1) : key;
-        LOGGER.debug("Searching for video with key ending with: {}", searchSuffix);
+        LOGGER.debug("Searching for video with key ending with suffix");
 
         final var videoOpt = repository.findByKeyEndingWith(searchSuffix);
 
         if (videoOpt.isEmpty()) {
-            LOGGER.warn("Video not found with key ending with: {}", searchSuffix);
+            LOGGER.warn("Video not found");
             throw new VideoNotFoundException(key);
         }
 
         final var video = videoOpt.get();
 
-        LOGGER.info("Found video with key: {} and status: {}", video.getKey(), video.getStatus());
+        LOGGER.info("Found video");
 
         return new VideoStatusResponse(
             video.getId(),

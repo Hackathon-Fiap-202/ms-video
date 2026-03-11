@@ -63,7 +63,6 @@ class VideoControllerTest {
             // Arrange
             final String userId = "user-123";
             final String expectedKey = "video-input-storage/start-process/abc.mp4";
-            when(file.getOriginalFilename()).thenReturn("video.mp4");
             when(videoUploadUseCase.upload(file, userId)).thenReturn(expectedKey);
 
             // Act

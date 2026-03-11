@@ -36,7 +36,7 @@ public class VideoUploadPresignUseCase {
     }
 
     public VideoUploadPresignResponse presign(VideoUploadPresignRequest request, String userId) {
-        LOGGER.info("Generating presigned upload URL for file: {} user: {}", request.getFilename(), userId);
+        LOGGER.info("Generating presigned upload URL");
 
         validateRequest(request);
 
@@ -45,7 +45,7 @@ public class VideoUploadPresignUseCase {
 
         saveReceived(request, key, userId);
 
-        LOGGER.info("Presigned upload URL generated for key: {}", key);
+        LOGGER.info("Presigned upload URL generated");
         return new VideoUploadPresignResponse(key, presignedUrl, EXPIRES_IN_LABEL);
     }
 
@@ -57,7 +57,7 @@ public class VideoUploadPresignUseCase {
     }
 
     private void saveReceived(VideoUploadPresignRequest request, String key, String userId) {
-        LOGGER.debug("Saving video document with status RECEIVED for key: {}", key);
+        LOGGER.debug("Saving video document with status RECEIVED");
         final var doc = new VideoDocument();
         doc.setBucket(bucketName);
         doc.setKey(key);

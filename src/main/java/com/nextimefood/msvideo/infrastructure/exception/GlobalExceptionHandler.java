@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(VideoNotFoundException.class)
     public ProblemDetail handleVideoNotFoundException(VideoNotFoundException ex) {
-        LOGGER.error("Video not found exception: {}", ex.getMessage());
+        LOGGER.error("Video not found exception");
         
         final var problemDetail = ProblemDetail.forStatusAndDetail(
             HttpStatus.NOT_FOUND,
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidFileException.class)
     public ProblemDetail handleInvalidFileException(InvalidFileException ex) {
-        LOGGER.error("Invalid file exception: {}", ex.getMessage());
+        LOGGER.error("Invalid file exception");
         
         final var problemDetail = ProblemDetail.forStatusAndDetail(
             HttpStatus.BAD_REQUEST,
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ProblemDetail handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
-        LOGGER.error("Max upload size exceeded: {}", ex.getMessage());
+        LOGGER.error("Max upload size exceeded");
         
         final var problemDetail = ProblemDetail.forStatusAndDetail(
             HttpStatus.PAYLOAD_TOO_LARGE,
@@ -82,7 +82,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleIllegalArgumentException(IllegalArgumentException ex) {
-        LOGGER.error("Illegal argument exception: {}", ex.getMessage());
+        LOGGER.error("Illegal argument exception");
         
         final var problemDetail = ProblemDetail.forStatusAndDetail(
             HttpStatus.BAD_REQUEST,
