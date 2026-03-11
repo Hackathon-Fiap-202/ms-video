@@ -28,4 +28,9 @@ public class VideoMongoAdapter implements VideoRepositoryPort {
     public java.util.Optional<VideoDocument> findByProcessedKey(String processedKey) {
         return repository.findByProcessedKey(processedKey);
     }
+
+    @Override
+    public java.util.Optional<VideoDocument> findByKeyEndingWith(String suffix) {
+        return repository.findByKeyEndingWith(suffix);
+    }
 }
