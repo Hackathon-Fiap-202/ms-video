@@ -64,8 +64,9 @@ class VideoStatusUseCaseTest {
         @DisplayName("Should return status RECEIVED when video is newly uploaded")
         void shouldReturnStatusReceivedWhenVideoIsNewlyUploaded() {
             // Arrange
+            final String searchSuffix = TEST_KEY.substring(TEST_KEY.lastIndexOf("/") + 1);
             videoDocument.setStatus(ProcessStatus.RECEIVED);
-            when(repository.findByKey(TEST_KEY)).thenReturn(Optional.of(videoDocument));
+            when(repository.findByKeyEndingWith(searchSuffix)).thenReturn(Optional.of(videoDocument));
 
             // Act
             final VideoStatusResponse response = videoStatusUseCase.getStatus(TEST_KEY);
@@ -81,15 +82,16 @@ class VideoStatusUseCaseTest {
             assertEquals(TEST_CREATED_AT, response.getCreatedAt());
             assertEquals(TEST_UPDATED_AT, response.getUpdatedAt());
 
-            verify(repository, times(1)).findByKey(TEST_KEY);
+            verify(repository, times(1)).findByKeyEndingWith(searchSuffix);
         }
 
         @Test
         @DisplayName("Should return status PROCESSING when video is being processed")
         void shouldReturnStatusProcessingWhenVideoIsBeingProcessed() {
             // Arrange
+            final String searchSuffix = TEST_KEY.substring(TEST_KEY.lastIndexOf("/") + 1);
             videoDocument.setStatus(ProcessStatus.PROCESSING);
-            when(repository.findByKey(TEST_KEY)).thenReturn(Optional.of(videoDocument));
+            when(repository.findByKeyEndingWith(searchSuffix)).thenReturn(Optional.of(videoDocument));
 
             // Act
             final VideoStatusResponse response = videoStatusUseCase.getStatus(TEST_KEY);
@@ -98,17 +100,18 @@ class VideoStatusUseCaseTest {
             assertNotNull(response);
             assertEquals(ProcessStatus.PROCESSING, response.getStatus());
 
-            verify(repository, times(1)).findByKey(TEST_KEY);
+            verify(repository, times(1)).findByKeyEndingWith(searchSuffix);
         }
 
         @Test
         @DisplayName("Should return status PROCESSED with frame count and archive size")
         void shouldReturnStatusProcessedWithFrameCountAndArchiveSize() {
             // Arrange
+            final String searchSuffix = TEST_KEY.substring(TEST_KEY.lastIndexOf("/") + 1);
             videoDocument.setStatus(ProcessStatus.PROCESSED);
             videoDocument.setFrameCount(120);
             videoDocument.setArchiveSize(512000L);
-            when(repository.findByKey(TEST_KEY)).thenReturn(Optional.of(videoDocument));
+            when(repository.findByKeyEndingWith(searchSuffix)).thenReturn(Optional.of(videoDocument));
 
             // Act
             final VideoStatusResponse response = videoStatusUseCase.getStatus(TEST_KEY);
@@ -119,15 +122,16 @@ class VideoStatusUseCaseTest {
             assertEquals(120, response.getFrameCount());
             assertEquals(512000L, response.getArchiveSize());
 
-            verify(repository, times(1)).findByKey(TEST_KEY);
+            verify(repository, times(1)).findByKeyEndingWith(searchSuffix);
         }
 
         @Test
         @DisplayName("Should return status FAILED when processing failed")
         void shouldReturnStatusFailedWhenProcessingFailed() {
             // Arrange
+            final String searchSuffix = TEST_KEY.substring(TEST_KEY.lastIndexOf("/") + 1);
             videoDocument.setStatus(ProcessStatus.FAILED);
-            when(repository.findByKey(TEST_KEY)).thenReturn(Optional.of(videoDocument));
+            when(repository.findByKeyEndingWith(searchSuffix)).thenReturn(Optional.of(videoDocument));
 
             // Act
             final VideoStatusResponse response = videoStatusUseCase.getStatus(TEST_KEY);
@@ -136,7 +140,7 @@ class VideoStatusUseCaseTest {
             assertNotNull(response);
             assertEquals(ProcessStatus.FAILED, response.getStatus());
 
-            verify(repository, times(1)).findByKey(TEST_KEY);
+            verify(repository, times(1)).findByKeyEndingWith(searchSuffix);
         }
     }
 
@@ -148,7 +152,8 @@ class VideoStatusUseCaseTest {
         @DisplayName("Should throw VideoNotFoundException when video does not exist")
         void shouldThrowVideoNotFoundExceptionWhenVideoDoesNotExist() {
             // Arrange
-            when(repository.findByKey(TEST_KEY)).thenReturn(Optional.empty());
+            final String searchSuffix = TEST_KEY.substring(TEST_KEY.lastIndexOf("/") + 1);
+            when(repository.findByKeyEndingWith(searchSuffix)).thenReturn(Optional.empty());
 
             // Act / Assert
             final VideoNotFoundException exception = assertThrows(
@@ -159,14 +164,14 @@ class VideoStatusUseCaseTest {
             assertEquals(TEST_KEY, exception.getVideoKey());
             assertTrue(exception.getMessage().contains(TEST_KEY));
 
-            verify(repository, times(1)).findByKey(TEST_KEY);
+            verify(repository, times(1)).findByKeyEndingWith(searchSuffix);
         }
 
         @Test
         @DisplayName("Should not call repository with null key")
         void shouldCallRepositoryEvenWithNullKey() {
             // Arrange
-            when(repository.findByKey(null)).thenReturn(Optional.empty());
+            when(repository.findByKeyEndingWith(null)).thenReturn(Optional.empty());
 
             // Act / Assert
             assertThrows(
@@ -174,7 +179,7 @@ class VideoStatusUseCaseTest {
                 () -> videoStatusUseCase.getStatus(null)
             );
 
-            verify(repository, times(1)).findByKey(null);
+            verify(repository, times(1)).findByKeyEndingWith(null);
         }
     }
 
@@ -183,17 +188,18 @@ class VideoStatusUseCaseTest {
     class RepositoryInteractionTests {
 
         @Test
-        @DisplayName("Should call findByKey exactly once")
-        void shouldCallFindByKeyExactlyOnce() {
+        @DisplayName("Should call findByKeyEndingWith exactly once")
+        void shouldCallFindByKeyEndingWithExactlyOnce() {
             // Arrange
+            final String searchSuffix = TEST_KEY.substring(TEST_KEY.lastIndexOf("/") + 1);
             videoDocument.setStatus(ProcessStatus.RECEIVED);
-            when(repository.findByKey(TEST_KEY)).thenReturn(Optional.of(videoDocument));
+            when(repository.findByKeyEndingWith(searchSuffix)).thenReturn(Optional.of(videoDocument));
 
             // Act
             videoStatusUseCase.getStatus(TEST_KEY);
 
             // Assert
-            verify(repository, times(1)).findByKey(TEST_KEY);
+            verify(repository, times(1)).findByKeyEndingWith(searchSuffix);
             verify(repository, never()).findByProcessedKey(TEST_KEY);
             verify(repository, never()).save(videoDocument);
         }

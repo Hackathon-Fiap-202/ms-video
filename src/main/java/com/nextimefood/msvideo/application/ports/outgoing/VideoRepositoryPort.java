@@ -10,4 +10,6 @@ public interface VideoRepositoryPort {
 
     java.util.Optional<VideoDocument> findByProcessedKey(String processedKey);
 
+    java.util.Optional<VideoDocument> findByKeyEndingWith(String suffix);
+
 }

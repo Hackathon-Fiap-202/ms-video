@@ -9,4 +9,6 @@ public interface VideoMongoRepository extends MongoRepository<VideoDocument, Str
 
     Optional<VideoDocument> findByProcessedKey(String processedKey);
 
+    Optional<VideoDocument> findByKeyEndingWith(String suffix);
+
 }
