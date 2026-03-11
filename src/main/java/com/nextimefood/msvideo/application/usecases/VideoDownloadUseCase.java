@@ -30,12 +30,12 @@ public class VideoDownloadUseCase {
     }
 
     public VideoDownloadResponse generateDownloadUrl(String processedKey) {
-        LOGGER.info("Generating download URL for processed key: {}", processedKey);
+        LOGGER.info("Generating download URL and finding by processed key");
 
         final var videoOpt = repository.findByProcessedKey(processedKey);
 
         if (videoOpt.isEmpty()) {
-            LOGGER.warn("Video not found with processed key: {}", processedKey);
+            LOGGER.warn("Video not found with processed key");
             throw new VideoNotFoundException(processedKey);
         }
 
@@ -43,7 +43,7 @@ public class VideoDownloadUseCase {
         final var fullS3Key = outputPrefix + OUTPUT_SUBPREFIX + video.getProcessedKey();
         final var presignedUrl = storage.generatePresignedUrl(video.getBucket(), fullS3Key, DOWNLOAD_DURATION);
 
-        LOGGER.info("Successfully generated download URL for processed key: {}", processedKey);
+        LOGGER.info("Successfully generated download URL");
 
         return new VideoDownloadResponse(
             video.getId(),
