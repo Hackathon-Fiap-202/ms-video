@@ -1,12 +1,17 @@
 package com.nextimefood.msvideo.infrastructure.controller;
 
 import com.nextimefood.msvideo.application.dto.VideoDownloadResponse;
+import com.nextimefood.msvideo.application.dto.VideoStatusResponse;
 import com.nextimefood.msvideo.application.dto.VideoUploadPresignRequest;
 import com.nextimefood.msvideo.application.dto.VideoUploadPresignResponse;
 import com.nextimefood.msvideo.application.usecases.VideoConfirmUploadUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoDownloadUseCase;
+import com.nextimefood.msvideo.application.usecases.VideoStatusUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoUploadPresignUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoUploadUseCase;
+import com.nextimefood.msvideo.domain.ProcessStatus;
+import com.nextimefood.msvideo.domain.exception.VideoNotFoundException;
+import java.time.Instant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,6 +43,9 @@ class VideoControllerTest {
 
     @Mock
     private VideoConfirmUploadUseCase videoConfirmUploadUseCase;
+
+    @Mock
+    private VideoStatusUseCase videoStatusUseCase;
 
     @Mock
     private MultipartFile file;
@@ -130,4 +139,86 @@ class VideoControllerTest {
             verify(videoDownloadUseCase).generateDownloadUrl(key);
         }
     }
+
+    @Nested
+    @DisplayName("getVideoStatus()")
+    class VideoStatusTests {
+
+        @Test
+        @DisplayName("Should return 200 with status response when video exists")
+        void shouldReturn200WithStatusResponseWhenVideoExists() {
+            // Arrange
+            final String key = "video-input-storage/start-process/abc123.mp4";
+            final var statusResponse = new VideoStatusResponse(
+                "doc-id-001",
+                key,
+                "my-video.mp4",
+                ProcessStatus.PROCESSING,
+                0,
+                0L,
+                Instant.parse("2026-01-01T10:00:00Z"),
+                Instant.parse("2026-01-01T10:05:00Z")
+            );
+            when(videoStatusUseCase.getStatus(key)).thenReturn(statusResponse);
+
+            // Act
+            final ResponseEntity<VideoStatusResponse> result = controller.getVideoStatus(key);
+
+            // Assert
+            assertNotNull(result);
+            assertEquals(200, result.getStatusCode().value());
+            assertNotNull(result.getBody());
+            assertEquals("doc-id-001", result.getBody().getVideoId());
+            assertEquals(key, result.getBody().getKey());
+            assertEquals(ProcessStatus.PROCESSING, result.getBody().getStatus());
+            verify(videoStatusUseCase).getStatus(key);
+        }
+
+        @Test
+        @DisplayName("Should return 200 with PROCESSED status and frame metadata")
+        void shouldReturn200WithProcessedStatusAndFrameMetadata() {
+            // Arrange
+            final String key = "video-input-storage/start-process/xyz.mp4";
+            final var statusResponse = new VideoStatusResponse(
+                "doc-id-002",
+                key,
+                "clip.mp4",
+                ProcessStatus.PROCESSED,
+                300,
+                1024000L,
+                Instant.parse("2026-01-01T08:00:00Z"),
+                Instant.parse("2026-01-01T08:30:00Z")
+            );
+            when(videoStatusUseCase.getStatus(key)).thenReturn(statusResponse);
+
+            // Act
+            final ResponseEntity<VideoStatusResponse> result = controller.getVideoStatus(key);
+
+            // Assert
+            assertNotNull(result);
+            assertEquals(200, result.getStatusCode().value());
+            assertNotNull(result.getBody());
+            assertEquals(ProcessStatus.PROCESSED, result.getBody().getStatus());
+            assertEquals(300, result.getBody().getFrameCount());
+            assertEquals(1024000L, result.getBody().getArchiveSize());
+            verify(videoStatusUseCase).getStatus(key);
+        }
+
+        @Test
+        @DisplayName("Should propagate VideoNotFoundException when video is not found")
+        void shouldPropagateVideoNotFoundExceptionWhenVideoIsNotFound() {
+            // Arrange
+            final String key = "non-existent-key";
+            when(videoStatusUseCase.getStatus(key)).thenThrow(new VideoNotFoundException(key));
+
+            // Act / Assert
+            assertThrows(
+                VideoNotFoundException.class,
+                () -> controller.getVideoStatus(key)
+            );
+
+            verify(videoStatusUseCase).getStatus(key);
+        }
+    }
 }
+
