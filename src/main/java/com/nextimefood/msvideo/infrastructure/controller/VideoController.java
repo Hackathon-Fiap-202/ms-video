@@ -1,10 +1,12 @@
 package com.nextimefood.msvideo.infrastructure.controller;
 
 import com.nextimefood.msvideo.application.dto.VideoDownloadResponse;
+import com.nextimefood.msvideo.application.dto.VideoStatusResponse;
 import com.nextimefood.msvideo.application.dto.VideoUploadPresignRequest;
 import com.nextimefood.msvideo.application.dto.VideoUploadPresignResponse;
 import com.nextimefood.msvideo.application.usecases.VideoConfirmUploadUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoDownloadUseCase;
+import com.nextimefood.msvideo.application.usecases.VideoStatusUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoUploadPresignUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoUploadUseCase;
 import org.slf4j.Logger;
@@ -32,16 +34,19 @@ public class VideoController {
     private final VideoDownloadUseCase videoDownloadUseCase;
     private final VideoUploadPresignUseCase videoUploadPresignUseCase;
     private final VideoConfirmUploadUseCase videoConfirmUploadUseCase;
+    private final VideoStatusUseCase videoStatusUseCase;
 
     public VideoController(
             VideoUploadUseCase videoUploadUseCase,
             VideoDownloadUseCase videoDownloadUseCase,
             VideoUploadPresignUseCase videoUploadPresignUseCase,
-            VideoConfirmUploadUseCase videoConfirmUploadUseCase) {
+            VideoConfirmUploadUseCase videoConfirmUploadUseCase,
+            VideoStatusUseCase videoStatusUseCase) {
         this.videoUploadUseCase = videoUploadUseCase;
         this.videoDownloadUseCase = videoDownloadUseCase;
         this.videoUploadPresignUseCase = videoUploadPresignUseCase;
         this.videoConfirmUploadUseCase = videoConfirmUploadUseCase;
+        this.videoStatusUseCase = videoStatusUseCase;
     }
 
     @PostMapping("/upload")
@@ -73,6 +78,13 @@ public class VideoController {
     public ResponseEntity<VideoDownloadResponse> getDownloadUrl(@PathVariable String key) {
         LOGGER.info("Received download request for video key: {}", key);
         final var response = videoDownloadUseCase.generateDownloadUrl(key);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{key}/status")
+    public ResponseEntity<VideoStatusResponse> getVideoStatus(@PathVariable String key) {
+        LOGGER.info("Received status request for video key: {}", key);
+        final var response = videoStatusUseCase.getStatus(key);
         return ResponseEntity.ok(response);
     }
 }
