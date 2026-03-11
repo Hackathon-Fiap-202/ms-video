@@ -27,11 +27,11 @@ public class VideoConfirmUploadUseCase {
     }
 
     public void confirm(String key) {
-        LOGGER.info("Confirming upload for key: {}", key);
+        LOGGER.info("Confirming upload");
 
         final var docOpt = repository.findByKey(key);
         if (docOpt.isEmpty()) {
-            LOGGER.warn("Video not found for confirmation, key: {}", key);
+            LOGGER.warn("Video not found for confirmation");
             throw new VideoNotFoundException(key);
         }
 
@@ -39,10 +39,10 @@ public class VideoConfirmUploadUseCase {
 
         final var payload = new VideoProcessMessage(doc.getBucket(), doc.getKey());
         publisher.publish(videoProcessCommandQueue, payload);
-        LOGGER.debug("Published process command for key: {}", key);
+        LOGGER.debug("Published process command");
 
         doc.setStatus(ProcessStatus.PROCESSING);
         repository.save(doc);
-        LOGGER.info("Upload confirmed and processing started for key: {}", key);
+        LOGGER.info("Upload confirmed and processing started");
     }
 }

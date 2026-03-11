@@ -54,7 +54,7 @@ public class VideoController {
     public String handleVideoUpload(
             @RequestParam("file") MultipartFile file,
             @RequestHeader("X-Cognito-User-Id") String userId) {
-        LOGGER.info("Received upload request for file: {} from user: {}", file.getOriginalFilename(), userId);
+        LOGGER.info("Received upload request");
         return videoUploadUseCase.upload(file, userId);
     }
 
@@ -62,7 +62,7 @@ public class VideoController {
     public ResponseEntity<VideoUploadPresignResponse> presignUpload(
             @RequestBody VideoUploadPresignRequest request,
             @RequestHeader("X-Cognito-User-Id") String userId) {
-        LOGGER.info("Received presign upload request for file: {} from user: {}", request.getFilename(), userId);
+        LOGGER.info("Received presign upload request");
         final var response = videoUploadPresignUseCase.presign(request, userId);
         return ResponseEntity.ok(response);
     }
@@ -70,20 +70,20 @@ public class VideoController {
     @PostMapping("/confirm/{key}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void confirmUpload(@PathVariable String key) {
-        LOGGER.info("Received upload confirmation for key: {}", key);
+        LOGGER.info("Received upload confirmation");
         videoConfirmUploadUseCase.confirm(key);
     }
 
     @GetMapping("/download/{key}")
     public ResponseEntity<VideoDownloadResponse> getDownloadUrl(@PathVariable String key) {
-        LOGGER.info("Received download request for video key: {}", key);
+        LOGGER.info("Received download request");
         final var response = videoDownloadUseCase.generateDownloadUrl(key);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{key}/status")
     public ResponseEntity<VideoStatusResponse> getVideoStatus(@PathVariable String key) {
-        LOGGER.info("Received status request for video key: {}", key);
+        LOGGER.info("Received status request");
         final var response = videoStatusUseCase.getStatus(key);
         return ResponseEntity.ok(response);
     }

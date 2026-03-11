@@ -27,12 +27,12 @@ public class VideoStatusUpdateUseCase {
     }
 
     public void processVideoStatusUpdate(VideoStatusEventDTO event) {
-        LOGGER.info("Processing video status update for videoKey: {}, success: {}", event.getVideoKey(), event.isSuccess());
+        LOGGER.info("Processing video status update");
         
         final var videoOpt = repository.findByKey(event.getVideoKey());
         
         if (videoOpt.isEmpty()) {
-            LOGGER.error("Video not found with key: {}", event.getVideoKey());
+            LOGGER.error("Video not found from event");
             return;
         }
         
@@ -46,7 +46,7 @@ public class VideoStatusUpdateUseCase {
     }
 
     private void handleSuccessfulProcessing(VideoStatusEventDTO event, VideoDocument video) {
-        LOGGER.info("Video processing succeeded for key: {}", event.getVideoKey());
+        LOGGER.info("Video processing succeeded");
 
         video.setStatus(event.getStatus());
         video.setFrameCount(event.getFrameCount());
@@ -62,16 +62,16 @@ public class VideoStatusUpdateUseCase {
 
         publisher.publish(videoProcessedEventQueue, lambdaEvent);
 
-        LOGGER.info("Video updated and event published for successful processing to queue: {}", videoProcessedEventQueue);
+        LOGGER.info("Video updated and event published for successful processing to queue");
     }
 
     private void handleFailedProcessing(VideoStatusEventDTO event, VideoDocument video) {
-        LOGGER.warn("Video processing failed for key: {}", event.getVideoKey());
+        LOGGER.warn("Video processing failed");
 
         video.setStatus(event.getStatus());
         repository.save(video);
 
-        LOGGER.info("Video status updated to {} for failed processing", event.getStatus());
+        LOGGER.info("Video status updated for failed processing");
     }
 
     private String deriveZipFilename(String inputKey) {
