@@ -123,26 +123,27 @@ class VideoMongoAdapterTest {
     }
 
     @Nested
-    @DisplayName("findAll()")
+    @DisplayName("findAllByCognitoUserId()")
     class FindAllTests {
 
         @Test
-        @DisplayName("Should return paginated documents")
+        @DisplayName("Should return paginated documents filtered by user id")
         void shouldReturnPaginatedDocuments() {
             // Arrange
             final var doc = new VideoDocument();
             doc.setId("abc");
+            final String userId = "user-123";
             final PageRequest pageRequest = PageRequest.of(0, 5);
             final Page<VideoDocument> page = new PageImpl<>(List.of(doc));
-            when(repository.findAll(pageRequest)).thenReturn(page);
+            when(repository.findAllByCognitoUserId(userId, pageRequest)).thenReturn(page);
 
             // Act
-            final Page<VideoDocument> result = adapter.findAll(pageRequest);
+            final Page<VideoDocument> result = adapter.findAllByCognitoUserId(userId, pageRequest);
 
             // Assert
             assertEquals(1, result.getTotalElements());
             assertEquals("abc", result.getContent().get(0).getId());
-            verify(repository).findAll(pageRequest);
+            verify(repository).findAllByCognitoUserId(userId, pageRequest);
         }
     }
 }

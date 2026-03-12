@@ -35,7 +35,7 @@ public class VideoMongoAdapter implements VideoRepositoryPort {
     }
 
     @Override
-    public org.springframework.data.domain.Page<VideoDocument> findAll(org.springframework.data.domain.Pageable pageable) {
-        return repository.findAll(pageable);
+    public org.springframework.data.domain.Page<VideoDocument> findAllByCognitoUserId(String cognitoUserId, org.springframework.data.domain.Pageable pageable) {
+        return repository.findAllByCognitoUserId(cognitoUserId, pageable);
     }
 }

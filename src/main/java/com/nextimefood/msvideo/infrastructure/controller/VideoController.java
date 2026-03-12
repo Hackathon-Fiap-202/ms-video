@@ -96,9 +96,10 @@ public class VideoController {
     @GetMapping
     public ResponseEntity<VideoPageResponseDTO> listVideos(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
-        LOGGER.info("Received list videos request for page {} with size {}", page, size);
-        final var response = listVideosUseCase.execute(page, size);
+            @RequestParam(defaultValue = "5") int size,
+            @RequestHeader("X-Cognito-User-Id") String userId) {
+        LOGGER.info("Received list videos request for user {} page {} with size {}", userId, page, size);
+        final var response = listVideosUseCase.execute(page, size, userId);
         return ResponseEntity.ok(response);
     }
 }
