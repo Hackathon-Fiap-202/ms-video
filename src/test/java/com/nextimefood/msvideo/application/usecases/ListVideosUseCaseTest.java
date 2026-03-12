@@ -42,10 +42,10 @@ class ListVideosUseCaseTest {
         VideoDocument doc = createVideoDocument("1", "video1.mp4");
         Page<VideoDocument> mockPage = new PageImpl<>(List.of(doc), pageRequest, 1);
         
-        when(videoRepositoryPort.findAll(pageRequest)).thenReturn(mockPage);
+        when(videoRepositoryPort.findAllByCognitoUserId("user-123", pageRequest)).thenReturn(mockPage);
 
         // Act
-        VideoPageResponseDTO response = useCase.execute(page, size);
+        VideoPageResponseDTO response = useCase.execute(page, size, "user-123");
 
         // Assert
         assertEquals(1, response.getContent().size());
@@ -56,7 +56,7 @@ class ListVideosUseCaseTest {
         assertEquals("1", response.getContent().get(0).getId());
         assertEquals("video1.mp4", response.getContent().get(0).getOriginalFilename());
         
-        verify(videoRepositoryPort).findAll(pageRequest);
+        verify(videoRepositoryPort).findAllByCognitoUserId("user-123", pageRequest);
     }
 
     @Test
@@ -69,17 +69,17 @@ class ListVideosUseCaseTest {
         
         Page<VideoDocument> mockPage = new PageImpl<>(List.of(), pageRequest, 0);
         
-        when(videoRepositoryPort.findAll(pageRequest)).thenReturn(mockPage);
+        when(videoRepositoryPort.findAllByCognitoUserId("user-123", pageRequest)).thenReturn(mockPage);
 
         // Act
-        VideoPageResponseDTO response = useCase.execute(page, size);
+        VideoPageResponseDTO response = useCase.execute(page, size, "user-123");
 
         // Assert
         assertEquals(0, response.getContent().size());
         assertEquals(0, response.getTotalElements());
         assertEquals(0, response.getTotalPages());
         
-        verify(videoRepositoryPort).findAll(pageRequest);
+        verify(videoRepositoryPort).findAllByCognitoUserId("user-123", pageRequest);
     }
 
     private VideoDocument createVideoDocument(String id, String filename) {

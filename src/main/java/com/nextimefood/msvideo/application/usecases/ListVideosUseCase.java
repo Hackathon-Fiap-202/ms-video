@@ -20,9 +20,9 @@ public class ListVideosUseCase {
         this.videoRepositoryPort = videoRepositoryPort;
     }
 
-    public VideoPageResponseDTO execute(int page, int size) {
+    public VideoPageResponseDTO execute(int page, int size, String userId) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<VideoDocument> videoPage = videoRepositoryPort.findAll(pageRequest);
+        Page<VideoDocument> videoPage = videoRepositoryPort.findAllByCognitoUserId(userId, pageRequest);
 
         List<VideoItemResponseDTO> content = videoPage.getContent().stream()
                 .map(this::mapToDTO)

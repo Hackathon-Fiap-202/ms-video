@@ -14,6 +14,6 @@ public interface VideoRepositoryPort {
 
     java.util.Optional<VideoDocument> findByKeyEndingWith(String suffix);
 
-    Page<VideoDocument> findAll(Pageable pageable);
+    Page<VideoDocument> findAllByCognitoUserId(String cognitoUserId, Pageable pageable);
 
 }

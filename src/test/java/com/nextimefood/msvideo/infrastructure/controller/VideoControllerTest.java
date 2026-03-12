@@ -241,50 +241,55 @@ class VideoControllerTest {
         void shouldReturn200WithPaginatedBody() {
             // Arrange
             final var item = new VideoItemResponseDTO();
+            final String userId = "user-123";
             item.setId("doc-id-001");
             final var response = new VideoPageResponseDTO(List.of(item), 0, 1, 1, 5);
-            when(listVideosUseCase.execute(0, 5)).thenReturn(response);
+            when(listVideosUseCase.execute(0, 5, userId)).thenReturn(response);
 
             // Act
-            final ResponseEntity<VideoPageResponseDTO> result = controller.listVideos(0, 5);
+            final ResponseEntity<VideoPageResponseDTO> result = controller.listVideos(0, 5, userId);
 
             // Assert
             assertNotNull(result);
             assertEquals(200, result.getStatusCode().value());
             assertEquals(response, result.getBody());
-            verify(listVideosUseCase).execute(0, 5);
+            verify(listVideosUseCase).execute(0, 5, userId);
         }
 
         @Test
-        @DisplayName("Should use default page=0 and size=5 when not provided")
+        @DisplayName("Should use default page=0 and size=5 when not provided and receive header")
         void shouldUseDefaultPageAndSize() throws Exception {
             // Arrange
+            final String userId = "user-123";
             final var response = new VideoPageResponseDTO(List.of(), 0, 0, 0, 5);
-            when(listVideosUseCase.execute(0, 5)).thenReturn(response);
+            when(listVideosUseCase.execute(0, 5, userId)).thenReturn(response);
             MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
             // Act & Assert
-            mockMvc.perform(get("/videos"))
+            mockMvc.perform(get("/videos")
+                    .header("X-Cognito-User-Id", userId))
                     .andExpect(status().isOk());
 
-            verify(listVideosUseCase).execute(0, 5);
+            verify(listVideosUseCase).execute(0, 5, userId);
         }
 
         @Test
         @DisplayName("Should return empty content with 200 when no videos exist")
         void shouldReturnEmptyContentWith200WhenNoVideosExist() throws Exception {
             // Arrange
+            final String userId = "user-123";
             final var response = new VideoPageResponseDTO(List.of(), 0, 0, 0, 5);
-            when(listVideosUseCase.execute(0, 5)).thenReturn(response);
+            when(listVideosUseCase.execute(0, 5, userId)).thenReturn(response);
             MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
             // Act & Assert
-            mockMvc.perform(get("/videos"))
+            mockMvc.perform(get("/videos")
+                    .header("X-Cognito-User-Id", userId))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isEmpty())
                     .andExpect(jsonPath("$.totalElements").value(0));
             
-            verify(listVideosUseCase).execute(0, 5);
+            verify(listVideosUseCase).execute(0, 5, userId);
         }
     }
 }
