@@ -4,6 +4,8 @@ import com.nextimefood.msvideo.application.dto.VideoDownloadResponse;
 import com.nextimefood.msvideo.application.dto.VideoStatusResponse;
 import com.nextimefood.msvideo.application.dto.VideoUploadPresignRequest;
 import com.nextimefood.msvideo.application.dto.VideoUploadPresignResponse;
+import com.nextimefood.msvideo.application.dto.VideoPageResponseDTO;
+import com.nextimefood.msvideo.application.usecases.ListVideosUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoConfirmUploadUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoDownloadUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoStatusUseCase;
@@ -35,18 +37,21 @@ public class VideoController {
     private final VideoUploadPresignUseCase videoUploadPresignUseCase;
     private final VideoConfirmUploadUseCase videoConfirmUploadUseCase;
     private final VideoStatusUseCase videoStatusUseCase;
+    private final ListVideosUseCase listVideosUseCase;
 
     public VideoController(
             VideoUploadUseCase videoUploadUseCase,
             VideoDownloadUseCase videoDownloadUseCase,
             VideoUploadPresignUseCase videoUploadPresignUseCase,
             VideoConfirmUploadUseCase videoConfirmUploadUseCase,
-            VideoStatusUseCase videoStatusUseCase) {
+            VideoStatusUseCase videoStatusUseCase,
+            ListVideosUseCase listVideosUseCase) {
         this.videoUploadUseCase = videoUploadUseCase;
         this.videoDownloadUseCase = videoDownloadUseCase;
         this.videoUploadPresignUseCase = videoUploadPresignUseCase;
         this.videoConfirmUploadUseCase = videoConfirmUploadUseCase;
         this.videoStatusUseCase = videoStatusUseCase;
+        this.listVideosUseCase = listVideosUseCase;
     }
 
     @PostMapping("/upload")
@@ -85,6 +90,15 @@ public class VideoController {
     public ResponseEntity<VideoStatusResponse> getVideoStatus(@PathVariable String key) {
         LOGGER.info("Received status request");
         final var response = videoStatusUseCase.getStatus(key);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<VideoPageResponseDTO> listVideos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        LOGGER.info("Received list videos request for page {} with size {}", page, size);
+        final var response = listVideosUseCase.execute(page, size);
         return ResponseEntity.ok(response);
     }
 }

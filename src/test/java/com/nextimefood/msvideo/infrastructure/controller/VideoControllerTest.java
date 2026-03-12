@@ -1,9 +1,12 @@
 package com.nextimefood.msvideo.infrastructure.controller;
 
 import com.nextimefood.msvideo.application.dto.VideoDownloadResponse;
+import com.nextimefood.msvideo.application.dto.VideoItemResponseDTO;
+import com.nextimefood.msvideo.application.dto.VideoPageResponseDTO;
 import com.nextimefood.msvideo.application.dto.VideoStatusResponse;
 import com.nextimefood.msvideo.application.dto.VideoUploadPresignRequest;
 import com.nextimefood.msvideo.application.dto.VideoUploadPresignResponse;
+import com.nextimefood.msvideo.application.usecases.ListVideosUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoConfirmUploadUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoDownloadUseCase;
 import com.nextimefood.msvideo.application.usecases.VideoStatusUseCase;
@@ -12,6 +15,7 @@ import com.nextimefood.msvideo.application.usecases.VideoUploadUseCase;
 import com.nextimefood.msvideo.domain.ProcessStatus;
 import com.nextimefood.msvideo.domain.exception.VideoNotFoundException;
 import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,7 +24,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.multipart.MultipartFile;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -46,6 +55,9 @@ class VideoControllerTest {
 
     @Mock
     private VideoStatusUseCase videoStatusUseCase;
+
+    @Mock
+    private ListVideosUseCase listVideosUseCase;
 
     @Mock
     private MultipartFile file;
@@ -217,6 +229,62 @@ class VideoControllerTest {
             );
 
             verify(videoStatusUseCase).getStatus(key);
+        }
+    }
+
+    @Nested
+    @DisplayName("listVideos()")
+    class ListVideosTests {
+
+        @Test
+        @DisplayName("Should return 200 with paginated body")
+        void shouldReturn200WithPaginatedBody() {
+            // Arrange
+            final var item = new VideoItemResponseDTO();
+            item.setId("doc-id-001");
+            final var response = new VideoPageResponseDTO(List.of(item), 0, 1, 1, 5);
+            when(listVideosUseCase.execute(0, 5)).thenReturn(response);
+
+            // Act
+            final ResponseEntity<VideoPageResponseDTO> result = controller.listVideos(0, 5);
+
+            // Assert
+            assertNotNull(result);
+            assertEquals(200, result.getStatusCode().value());
+            assertEquals(response, result.getBody());
+            verify(listVideosUseCase).execute(0, 5);
+        }
+
+        @Test
+        @DisplayName("Should use default page=0 and size=5 when not provided")
+        void shouldUseDefaultPageAndSize() throws Exception {
+            // Arrange
+            final var response = new VideoPageResponseDTO(List.of(), 0, 0, 0, 5);
+            when(listVideosUseCase.execute(0, 5)).thenReturn(response);
+            MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+
+            // Act & Assert
+            mockMvc.perform(get("/videos"))
+                    .andExpect(status().isOk());
+
+            verify(listVideosUseCase).execute(0, 5);
+        }
+
+        @Test
+        @DisplayName("Should return empty content with 200 when no videos exist")
+        void shouldReturnEmptyContentWith200WhenNoVideosExist() throws Exception {
+            // Arrange
+            final var response = new VideoPageResponseDTO(List.of(), 0, 0, 0, 5);
+            when(listVideosUseCase.execute(0, 5)).thenReturn(response);
+            MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+
+            // Act & Assert
+            mockMvc.perform(get("/videos"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content").isEmpty())
+                    .andExpect(jsonPath("$.totalElements").value(0));
+            
+            verify(listVideosUseCase).execute(0, 5);
         }
     }
 }

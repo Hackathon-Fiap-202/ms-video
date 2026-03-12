@@ -33,4 +33,9 @@ public class VideoMongoAdapter implements VideoRepositoryPort {
     public java.util.Optional<VideoDocument> findByKeyEndingWith(String suffix) {
         return repository.findByKeyEndingWith(suffix);
     }
+
+    @Override
+    public org.springframework.data.domain.Page<VideoDocument> findAll(org.springframework.data.domain.Pageable pageable) {
+        return repository.findAll(pageable);
+    }
 }
