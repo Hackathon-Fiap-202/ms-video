@@ -1,6 +1,7 @@
 package com.nextimefood.msvideo.application.usecases;
 
 import com.nextimefood.msvideo.application.dto.ProcessedVideoEvent;
+import com.nextimefood.msvideo.application.dto.VideoDownloadResponse;
 import com.nextimefood.msvideo.application.dto.VideoStatusEventDTO;
 import com.nextimefood.msvideo.application.ports.outgoing.MessagePublisherPort;
 import com.nextimefood.msvideo.application.ports.outgoing.VideoRepositoryPort;
@@ -34,6 +35,9 @@ class VideoStatusUpdateUseCaseTest {
 
     @Mock
     private MessagePublisherPort publisher;
+
+    @Mock
+    private VideoDownloadUseCase videoDownloadUseCase;
 
     @InjectMocks
     private VideoStatusUpdateUseCase videoStatusUpdateUseCase;
@@ -75,6 +79,9 @@ class VideoStatusUpdateUseCaseTest {
         when(repository.findByKey(TEST_VIDEO_KEY)).thenReturn(Optional.of(videoDocument));
         when(repository.save(any(VideoDocument.class))).thenReturn(videoDocument);
 
+        VideoDownloadResponse downloadResponse = new VideoDownloadResponse("123", EXPECTED_PROCESSED_KEY, "http://download.url", "1 hour");
+        when(videoDownloadUseCase.generateDownloadUrl(anyString())).thenReturn(downloadResponse);
+
         videoStatusUpdateUseCase.processVideoStatusUpdate(successEvent);
 
         verify(repository, times(1)).findByKey(TEST_VIDEO_KEY);
@@ -88,7 +95,8 @@ class VideoStatusUpdateUseCaseTest {
                 eq(TEST_QUEUE),
                 argThat(arg -> arg instanceof ProcessedVideoEvent evt
                         && EXPECTED_PROCESSED_KEY.equals(evt.getKeyName())
-                        && "PROCESSED".equals(evt.getStatus()))
+                        && "PROCESSED".equals(evt.getStatus())
+                        && "http://download.url".equals(evt.getDownloadUrl()))
         );
     }
 
@@ -136,6 +144,9 @@ class VideoStatusUpdateUseCaseTest {
         when(repository.findByKey(TEST_VIDEO_KEY)).thenReturn(Optional.of(videoDocument));
         when(repository.save(any(VideoDocument.class))).thenReturn(videoDocument);
 
+        VideoDownloadResponse downloadResponse = new VideoDownloadResponse("123", EXPECTED_PROCESSED_KEY, "http://download.url", "1 hour");
+        when(videoDownloadUseCase.generateDownloadUrl(anyString())).thenReturn(downloadResponse);
+
         videoStatusUpdateUseCase.processVideoStatusUpdate(successEvent);
 
         verify(repository).save(argThat(video ->
@@ -173,6 +184,9 @@ class VideoStatusUpdateUseCaseTest {
 
         when(repository.findByKey("video-input-storage/start-process/abc123")).thenReturn(Optional.of(videoDocument));
         when(repository.save(any(VideoDocument.class))).thenReturn(videoDocument);
+
+        VideoDownloadResponse downloadResponse = new VideoDownloadResponse("123", EXPECTED_PROCESSED_KEY, "http://download.url", "1 hour");
+        when(videoDownloadUseCase.generateDownloadUrl(anyString())).thenReturn(downloadResponse);
 
         videoStatusUpdateUseCase.processVideoStatusUpdate(eventNoExt);
 
