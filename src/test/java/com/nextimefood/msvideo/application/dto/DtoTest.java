@@ -23,19 +23,19 @@ class DtoTest {
             final var msg = new VideoProcessMessage();
 
             // Assert
-            assertNull(msg.getBucket());
-            assertNull(msg.getKey());
+            assertNull(msg.getRecords());
         }
 
         @Test
-        @DisplayName("Should create with all-args constructor and expose fields via getters")
+        @DisplayName("Should create with all-args constructor and expose structured fields")
         void shouldCreateWithAllArgsConstructor() {
             // Act
             final var msg = new VideoProcessMessage("my-bucket", "video/key.mp4");
 
             // Assert
-            assertEquals("my-bucket", msg.getBucket());
-            assertEquals("video/key.mp4", msg.getKey());
+            assertEquals(1, msg.getRecords().size());
+            assertEquals("my-bucket", msg.getRecords().get(0).getS3().getBucket().getName());
+            assertEquals("video/key.mp4", msg.getRecords().get(0).getS3().getObject().getKey());
         }
 
         @Test
@@ -45,12 +45,16 @@ class DtoTest {
             final var msg = new VideoProcessMessage();
 
             // Act
-            msg.setBucket("bucket-2");
-            msg.setKey("key-2.mp4");
+            msg.setRecords(java.util.List.of(new VideoProcessMessage.Record(
+                    new VideoProcessMessage.S3(
+                            new VideoProcessMessage.Bucket("bucket-2"),
+                            new VideoProcessMessage.ObjectInfo("key-2.mp4")
+                    )
+            )));
 
             // Assert
-            assertEquals("bucket-2", msg.getBucket());
-            assertEquals("key-2.mp4", msg.getKey());
+            assertEquals("bucket-2", msg.getRecords().get(0).getS3().getBucket().getName());
+            assertEquals("key-2.mp4", msg.getRecords().get(0).getS3().getObject().getKey());
         }
     }
 
