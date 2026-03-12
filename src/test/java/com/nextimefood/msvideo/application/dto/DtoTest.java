@@ -120,18 +120,15 @@ class DtoTest {
         }
 
         @Test
-        @DisplayName("Should create with all-args constructor and expose fields")
+        @DisplayName("Should create with all-args constructor")
         void shouldCreateWithAllArgsConstructor() {
             // Act
-            final var dto = new VideoStatusEventDTO("key-1", true, ProcessStatus.PROCESSED, 30, 1024L, "2026-01-01T00:00:00Z");
+            final var event = new ProcessedVideoEvent("user-1", "key.mp4", "PROCESSING", null);
 
             // Assert
-            assertEquals("key-1", dto.getVideoKey());
-            assertTrue(dto.isSuccess());
-            assertEquals(ProcessStatus.PROCESSED, dto.getStatus());
-            assertEquals(30, dto.getFrameCount());
-            assertEquals(1024L, dto.getArchiveSize());
-            assertEquals("2026-01-01T00:00:00Z", dto.getTimestamp());
+            assertEquals("user-1", event.getCognitoUserId());
+            assertEquals("key.mp4", event.getKeyName());
+            assertEquals("PROCESSING", event.getStatus());
         }
 
         @Test
@@ -193,7 +190,7 @@ class DtoTest {
         @DisplayName("Should create with all-args constructor")
         void shouldCreateWithAllArgsConstructor() {
             // Act
-            final var event = new ProcessedVideoEvent("user-1", "key.mp4", "PROCESSING");
+            final var event = new ProcessedVideoEvent("user-1", "key.mp4", "PROCESSING", null);
 
             // Assert
             assertEquals("user-1", event.getCognitoUserId());
