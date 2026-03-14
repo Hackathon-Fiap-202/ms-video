@@ -11,7 +11,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -81,6 +85,65 @@ class VideoMongoAdapterTest {
 
             // Assert
             assertTrue(result.isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("findByProcessedKey()")
+    class FindByProcessedKeyTests {
+
+        @Test
+        @DisplayName("Should return present optional when document found by processedKey")
+        void shouldReturnPresentOptionalWhenFoundByProcessedKey() {
+            // Arrange
+            final var doc = new VideoDocument();
+            doc.setProcessedKey("abc123.zip");
+            when(repository.findByProcessedKey("abc123.zip")).thenReturn(Optional.of(doc));
+
+            // Act
+            final Optional<VideoDocument> result = adapter.findByProcessedKey("abc123.zip");
+
+            // Assert
+            assertTrue(result.isPresent());
+            assertEquals("abc123.zip", result.get().getProcessedKey());
+        }
+
+        @Test
+        @DisplayName("Should return empty optional when document not found by processedKey")
+        void shouldReturnEmptyOptionalWhenNotFoundByProcessedKey() {
+            // Arrange
+            when(repository.findByProcessedKey("missing.zip")).thenReturn(Optional.empty());
+
+            // Act
+            final Optional<VideoDocument> result = adapter.findByProcessedKey("missing.zip");
+
+            // Assert
+            assertTrue(result.isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("findAllByCognitoUserId()")
+    class FindAllTests {
+
+        @Test
+        @DisplayName("Should return paginated documents filtered by user id")
+        void shouldReturnPaginatedDocuments() {
+            // Arrange
+            final var doc = new VideoDocument();
+            doc.setId("abc");
+            final String userId = "user-123";
+            final PageRequest pageRequest = PageRequest.of(0, 5);
+            final Page<VideoDocument> page = new PageImpl<>(List.of(doc));
+            when(repository.findAllByCognitoUserId(userId, pageRequest)).thenReturn(page);
+
+            // Act
+            final Page<VideoDocument> result = adapter.findAllByCognitoUserId(userId, pageRequest);
+
+            // Assert
+            assertEquals(1, result.getTotalElements());
+            assertEquals("abc", result.getContent().get(0).getId());
+            verify(repository).findAllByCognitoUserId(userId, pageRequest);
         }
     }
 }

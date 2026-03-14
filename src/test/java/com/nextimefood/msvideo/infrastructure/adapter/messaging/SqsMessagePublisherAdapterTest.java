@@ -52,6 +52,35 @@ class SqsMessagePublisherAdapterTest {
     }
 
     @Nested
+    @DisplayName("Validation Path Tests")
+    class ValidationPathTests {
+
+        @Test
+        @DisplayName("Should not publish when payload is null")
+        void shouldNotPublishWhenPayloadIsNull() {
+            // Act
+            adapter.publish("test-queue", null);
+
+            // Assert
+            verify(sqsTemplate, org.mockito.Mockito.never()).send(any(Consumer.class));
+        }
+
+        @Test
+        @DisplayName("Should not publish when body is empty JSON")
+        void shouldNotPublishWhenBodyIsEmptyJson() throws JsonProcessingException {
+            // Arrange
+            final var payload = new Object();
+            when(objectMapper.writeValueAsString(payload)).thenReturn("{}");
+
+            // Act
+            adapter.publish("test-queue", payload);
+
+            // Assert
+            verify(sqsTemplate, org.mockito.Mockito.never()).send(any(Consumer.class));
+        }
+    }
+
+    @Nested
     @DisplayName("Error handling")
     class ErrorPathTests {
 

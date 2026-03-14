@@ -23,4 +23,19 @@ public class VideoMongoAdapter implements VideoRepositoryPort {
     public java.util.Optional<VideoDocument> findByKey(String key) {
         return repository.findByKey(key);
     }
+
+    @Override
+    public java.util.Optional<VideoDocument> findByProcessedKey(String processedKey) {
+        return repository.findByProcessedKey(processedKey);
+    }
+
+    @Override
+    public java.util.Optional<VideoDocument> findByKeyEndingWith(String suffix) {
+        return repository.findByKeyEndingWith(suffix);
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<VideoDocument> findAllByCognitoUserId(String cognitoUserId, org.springframework.data.domain.Pageable pageable) {
+        return repository.findAllByCognitoUserId(cognitoUserId, pageable);
+    }
 }

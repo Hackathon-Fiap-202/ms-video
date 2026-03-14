@@ -26,11 +26,21 @@ public class SqsMessagePublisherAdapter implements MessagePublisherPort {
 
     @Override
     public void publish(String queueName, Object payload) {
+        if (payload == null) {
+            LOGGER.warn("Payload is null, ignoring message for queue: {}", queueName);
+            return;
+        }
+
         LOGGER.info("Publishing message to queue: {}", queueName);
         LOGGER.debug("Message payload type: {}", payload.getClass().getSimpleName());
 
         try {
             final var body = toJson(payload);
+            if (body == null || body.trim().isEmpty() || "{}".equals(body.trim())) {
+                LOGGER.warn("Serialized message body is empty, ignoring message for queue: {}", queueName);
+                return;
+            }
+
             LOGGER.info("Serialized message body: {}", body);
 
             sqsTemplate.send(to -> to

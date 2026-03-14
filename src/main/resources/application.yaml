@@ -26,6 +26,7 @@ spring:
     s3:
       bucket-name: ${SPRING_CLOUD_S3_BUCKET_NAME:msvideo-bucket}
       input-prefix: ${SPRING_CLOUD_S3_INPUT_PREFIX:video-input-storage/}
+      output-prefix: ${SPRING_CLOUD_S3_OUTPUT_PREFIX:video-processed-storage/}
 
 springdoc:
   swagger-ui:
