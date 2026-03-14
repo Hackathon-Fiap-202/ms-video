@@ -43,20 +43,20 @@ public class VideoUploadUseCase {
     }
 
     public String upload(MultipartFile file, String userId) {
-        LOGGER.info("Starting video upload process for file: {} from user: {}", file != null ? file.getOriginalFilename() : "null", userId);
+        LOGGER.info("Starting video upload process");
         
         validateFile(file);
         
         try {
             final var key = generateUniqueKey(file.getOriginalFilename());
-            LOGGER.debug("Generated unique key for video: {}", key);
+            LOGGER.debug("Generated unique key for video");
             
             final var doc = saveReceived(file, key, userId);
             uploadFile(file, key);
             publishMessage(key);
             updateStatus(doc, ProcessStatus.PROCESSING);
             
-            LOGGER.info("Video upload completed successfully with key: {}", key);
+            LOGGER.info("Video upload completed successfully");
             return key;
         } catch (IOException e) {
             throw new VideoUploadException("Erro ao fazer upload do vídeo", e);
@@ -79,7 +79,7 @@ public class VideoUploadUseCase {
     }
 
     private VideoDocument saveReceived(MultipartFile file, String key, String userId) {
-        LOGGER.debug("Saving video document with status RECEIVED for key: {} for user: {}", key, userId);
+        LOGGER.debug("Saving video document with status RECEIVED");
         final var request = new VideoUploadRequest(file.getOriginalFilename(), file.getContentType(), file.getSize());
         final var doc = mapper.toDocument(request);
         doc.setBucket(bucketName);
@@ -90,20 +90,20 @@ public class VideoUploadUseCase {
     }
 
     private void uploadFile(MultipartFile file, String key) throws IOException {
-        LOGGER.debug("Uploading file to S3 bucket: {} with key: {}", bucketName, key);
+        LOGGER.debug("Uploading file to S3 bucket");
         storage.upload(bucketName, key, file.getInputStream());
         LOGGER.debug("File uploaded successfully to S3");
     }
 
     private void publishMessage(String key) {
-        LOGGER.debug("Publishing message to video process command queue for key: {}", key);
+        LOGGER.debug("Publishing message to video process command queue");
         final var payload = new VideoProcessMessage(bucketName, key);
         publisher.publish(videoProcessCommandQueue, payload);
         LOGGER.debug("Message published successfully");
     }
 
     private void updateStatus(VideoDocument doc, ProcessStatus status) {
-        LOGGER.debug("Updating video status to: {} for key: {}", status, doc.getKey());
+        LOGGER.debug("Updating video status");
         doc.setStatus(status);
         repository.save(doc);
     }

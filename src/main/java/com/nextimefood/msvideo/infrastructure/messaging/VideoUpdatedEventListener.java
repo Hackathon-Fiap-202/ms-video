@@ -26,16 +26,16 @@ public class VideoUpdatedEventListener {
     @SqsListener("${spring.cloud.sqs.queues.video-updated-event}")
     public void listen(String message) {
         LOGGER.info("Received message from video-updated-event queue");
-        LOGGER.debug("Message content: {}", message);
+        LOGGER.debug("Message content received");
 
         try {
             final var event = deserializeMessage(message);
             
-            LOGGER.info("Processing video updated event for videoKey: {}", event.getVideoKey());
+            LOGGER.info("Processing video updated event");
 
             videoStatusUpdateUseCase.processVideoStatusUpdate(event);
 
-            LOGGER.info("Successfully processed video updated event for videoKey: {}", event.getVideoKey());
+            LOGGER.info("Successfully processed video updated event");
 
         } catch (JsonProcessingException e) {
             throw new MessageProcessingException("Erro ao deserializar mensagem do evento de vídeo atualizado", e);

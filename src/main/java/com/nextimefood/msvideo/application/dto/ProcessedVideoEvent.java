@@ -16,4 +16,6 @@ public class ProcessedVideoEvent {
     @JsonProperty("key_name")
     private String keyName;
     private String status;
+    @JsonProperty("download_url")
+    private String downloadUrl;
 }

@@ -23,19 +23,19 @@ class DtoTest {
             final var msg = new VideoProcessMessage();
 
             // Assert
-            assertNull(msg.getBucket());
-            assertNull(msg.getKey());
+            assertNull(msg.getRecords());
         }
 
         @Test
-        @DisplayName("Should create with all-args constructor and expose fields via getters")
+        @DisplayName("Should create with all-args constructor and expose structured fields")
         void shouldCreateWithAllArgsConstructor() {
             // Act
             final var msg = new VideoProcessMessage("my-bucket", "video/key.mp4");
 
             // Assert
-            assertEquals("my-bucket", msg.getBucket());
-            assertEquals("video/key.mp4", msg.getKey());
+            assertEquals(1, msg.getRecords().size());
+            assertEquals("my-bucket", msg.getRecords().get(0).getS3().getBucket().getName());
+            assertEquals("video/key.mp4", msg.getRecords().get(0).getS3().getObject().getKey());
         }
 
         @Test
@@ -45,12 +45,16 @@ class DtoTest {
             final var msg = new VideoProcessMessage();
 
             // Act
-            msg.setBucket("bucket-2");
-            msg.setKey("key-2.mp4");
+            msg.setRecords(java.util.List.of(new VideoProcessMessage.Record(
+                    new VideoProcessMessage.S3(
+                            new VideoProcessMessage.Bucket("bucket-2"),
+                            new VideoProcessMessage.ObjectInfo("key-2.mp4")
+                    )
+            )));
 
             // Assert
-            assertEquals("bucket-2", msg.getBucket());
-            assertEquals("key-2.mp4", msg.getKey());
+            assertEquals("bucket-2", msg.getRecords().get(0).getS3().getBucket().getName());
+            assertEquals("key-2.mp4", msg.getRecords().get(0).getS3().getObject().getKey());
         }
     }
 
@@ -116,18 +120,15 @@ class DtoTest {
         }
 
         @Test
-        @DisplayName("Should create with all-args constructor and expose fields")
+        @DisplayName("Should create with all-args constructor")
         void shouldCreateWithAllArgsConstructor() {
             // Act
-            final var dto = new VideoStatusEventDTO("key-1", true, ProcessStatus.PROCESSED, 30, 1024L, "2026-01-01T00:00:00Z");
+            final var event = new ProcessedVideoEvent("user-1", "key.mp4", "PROCESSING", null);
 
             // Assert
-            assertEquals("key-1", dto.getVideoKey());
-            assertTrue(dto.isSuccess());
-            assertEquals(ProcessStatus.PROCESSED, dto.getStatus());
-            assertEquals(30, dto.getFrameCount());
-            assertEquals(1024L, dto.getArchiveSize());
-            assertEquals("2026-01-01T00:00:00Z", dto.getTimestamp());
+            assertEquals("user-1", event.getCognitoUserId());
+            assertEquals("key.mp4", event.getKeyName());
+            assertEquals("PROCESSING", event.getStatus());
         }
 
         @Test
@@ -189,7 +190,7 @@ class DtoTest {
         @DisplayName("Should create with all-args constructor")
         void shouldCreateWithAllArgsConstructor() {
             // Act
-            final var event = new ProcessedVideoEvent("user-1", "key.mp4", "PROCESSING");
+            final var event = new ProcessedVideoEvent("user-1", "key.mp4", "PROCESSING", null);
 
             // Assert
             assertEquals("user-1", event.getCognitoUserId());
@@ -199,39 +200,91 @@ class DtoTest {
     }
 
     @Nested
-    @DisplayName("VideoDownloadResponse")
-    class VideoDownloadResponseTests {
+    @DisplayName("VideoUploadPresignRequest")
+    class VideoUploadPresignRequestTests {
+
+        @Test
+        @DisplayName("Should create with no-arg constructor")
+        void shouldCreateWithNoArgConstructor() {
+            // Act
+            final var req = new VideoUploadPresignRequest();
+
+            // Assert
+            assertNull(req.getFilename());
+            assertNull(req.getContentType());
+        }
 
         @Test
         @DisplayName("Should create with all-args constructor and expose fields")
         void shouldCreateWithAllArgsConstructor() {
             // Act
-            final var resp = new VideoDownloadResponse("id-1", "key.mp4", "https://s3.example.com/signed", "10m");
+            final var req = new VideoUploadPresignRequest("video.mp4", "video/mp4");
 
             // Assert
-            assertEquals("id-1", resp.getVideoId());
-            assertEquals("key.mp4", resp.getKey());
-            assertEquals("https://s3.example.com/signed", resp.getDownloadUrl());
-            assertEquals("10m", resp.getExpiresIn());
+            assertEquals("video.mp4", req.getFilename());
+            assertEquals("video/mp4", req.getContentType());
         }
 
         @Test
         @DisplayName("Should set fields via setters")
         void shouldSetFieldsViaSetters() {
             // Arrange
-            final var resp = new VideoDownloadResponse();
+            final var req = new VideoUploadPresignRequest();
 
             // Act
-            resp.setVideoId("id-2");
-            resp.setKey("other.mp4");
-            resp.setDownloadUrl("https://s3.example.com/other");
-            resp.setExpiresIn("5m");
+            req.setFilename("clip.mp4");
+            req.setContentType("video/avi");
 
             // Assert
-            assertEquals("id-2", resp.getVideoId());
-            assertEquals("other.mp4", resp.getKey());
-            assertEquals("https://s3.example.com/other", resp.getDownloadUrl());
-            assertEquals("5m", resp.getExpiresIn());
+            assertEquals("clip.mp4", req.getFilename());
+            assertEquals("video/avi", req.getContentType());
+        }
+    }
+
+    @Nested
+    @DisplayName("VideoUploadPresignResponse")
+    class VideoUploadPresignResponseTests {
+
+        @Test
+        @DisplayName("Should create with no-arg constructor")
+        void shouldCreateWithNoArgConstructor() {
+            // Act
+            final var resp = new VideoUploadPresignResponse();
+
+            // Assert
+            assertNull(resp.getKey());
+            assertNull(resp.getUploadUrl());
+            assertNull(resp.getExpiresIn());
+        }
+
+        @Test
+        @DisplayName("Should create with all-args constructor and expose fields")
+        void shouldCreateWithAllArgsConstructor() {
+            // Act
+            final var resp = new VideoUploadPresignResponse("some-key", "https://s3.example.com/put-url", "15 minutes");
+
+            // Assert
+            assertEquals("some-key", resp.getKey());
+            assertEquals("https://s3.example.com/put-url", resp.getUploadUrl());
+            assertEquals("15 minutes", resp.getExpiresIn());
+        }
+
+        @Test
+        @DisplayName("Should set fields via setters")
+        void shouldSetFieldsViaSetters() {
+            // Arrange
+            final var resp = new VideoUploadPresignResponse();
+
+            // Act
+            resp.setKey("other-key");
+            resp.setUploadUrl("https://s3.example.com/other");
+            resp.setExpiresIn("10 minutes");
+
+            // Assert
+            assertEquals("other-key", resp.getKey());
+            assertEquals("https://s3.example.com/other", resp.getUploadUrl());
+            assertEquals("10 minutes", resp.getExpiresIn());
         }
     }
 }
+
